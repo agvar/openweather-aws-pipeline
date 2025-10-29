@@ -1,0 +1,31 @@
+# AWS Configuration
+# Best practice: Store non-sensitive configuration here
+# Sensitive data (keys, secrets) should be in environment variables or AWS credentials file
+
+aws:
+  region: "us-east-2"  # Change to your preferred region
+  
+s3:
+  buckets:
+    source_bucket: "data-analytics-storage-11012024-xyz00exr"  
+  
+dynamodb:
+  tables:
+    main_table: "my-dynamo-table"  # Replace with your actual table name
+  
+# Application settings
+app:
+  batch_size: 100
+  retry_attempts: 3
+  log_level: "INFO"
+  weather_url: "https://api.openweathermap.org/data/3.0/onecall"
+  geocoding_by_zipcode_url: "http://api.openweathermap.org/geo/1.0/zip"
+  zipcodes: 
+    - "10001"  # Manhattan
+    - "10002"  # Lower East Side
+    - "10003"  # East Village
+    - "11201"  # Brooklyn Heights
+    - "11101"  # Long Island City
+  ISO3166_code: "US" 
+  header_user_agent : "WeatherApp/1.0"
+  header_accept : "application/json"

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Environment variables
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+
+# AWS
+.aws/
+terraform.tfstate*
+terraform.tfvars
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfplan
+*.tfplan.*
+
+# OS
+.DS_Store
+Thumbs.db
