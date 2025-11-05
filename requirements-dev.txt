@@ -1,6 +1,6 @@
 types-requests==2.32.4.20250913
 types-boto3==1.40.66
-types==6.0.12.20250915
+types-PyYAML==6.0.12.20250915
 mypy==1.18.2
 black==25.9.0
 flake8==7.3.0
