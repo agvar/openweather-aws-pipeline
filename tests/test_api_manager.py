@@ -16,7 +16,7 @@ class TestAPIManager:
     
     def test_init_creates_session_with_headers(self):
         assert self.api_manager.session.headers['User-Agent'] == self.header_user_agent
-        assert self.api_manager.session.headers['Accept'] == self.header_user_agent
+        assert self.api_manager.session.headers['Accept'] == self.header_accept
     
     @patch('requests.Session.get')
     def test_api_get_sucess(self,mock_get):
@@ -25,13 +25,13 @@ class TestAPIManager:
         mock_get.return_value = mock_response
 
         result = self.api_manager.API_get(
-            url="https://testapi.weather",
+            "https://testapi.weather",
             params = {"q":"London"},
             timeout=10
         )
         assert result == mock_response
         mock_get.assert_called_once_with(
-            url="https://testapi.weather",
+            "https://testapi.weather",
             params = {"q":"London"},
             timeout=10
         )

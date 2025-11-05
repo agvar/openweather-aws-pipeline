@@ -2,15 +2,14 @@ import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime
 import uuid
-from typing import Dict,Any
 
 
 class S3Operations:
-    def __init__(self, bucket: str, region: str)-> None:
+    def __init__(self, bucket: str, region: str) -> None:
         self.s3_client = boto3.client("s3", region_name=region)
         self._validate_bucket(bucket)
 
-    def _validate_bucket(self, bucket: str)-> None:
+    def _validate_bucket(self, bucket: str) -> None:
         try:
             self.s3_client.head_bucket(Bucket=bucket)
             print("Bucket exists and is readable {bucket}")
