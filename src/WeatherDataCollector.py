@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 import os
 import yaml
 import json
-
+from typing import Dict,Any
 
 class WeatherDataCollector:
-    def __init__(self, config_path="../config/config.yaml"):
+    def __init__(self, config_path: str ="../config/config.yaml"):
         try:
             self.api_key = self._get_api_key()
             self.config = self.__setup_config(config_path)
@@ -56,15 +56,20 @@ class WeatherDataCollector:
         except Exception:
             raise
 
-    def __setup_config(self, config_path):
+    def __setup_config(self, config_path : str ) -> Dict[str, Any]:
         try:
             with open(config_path) as cfile:
                 config = yaml.safe_load(cfile)
+                if not isinstance(config,dict):
+                    raise ValueError("Configuration file msut be Dictionary")
+                for section,section_vals in config.items():
+                    if not isinstance(section_vals,dict):
+                        raise ValueError(f"Configuration {section} section must be Dictionary")
                 return config
         except Exception as e:
             raise e
 
-    def _get_api_key(self):
+    def _get_api_key(self)-> str:
         load_dotenv("../config/.env")
         api_key = os.getenv("API_KEY")
         if not api_key:

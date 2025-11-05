@@ -2,19 +2,20 @@ import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime
 import uuid
+from typing import Dict,Any
 
 
 class S3Operations:
-    def __init__(self, bucket, region):
+    def __init__(self, bucket: str, region: str)-> None:
         self.s3_client = boto3.client("s3", region_name=region)
         self._validate_bucket(bucket)
 
-    def _validate_bucket(self, bucket):
+    def _validate_bucket(self, bucket: str)-> None:
         try:
             self.s3_client.head_bucket(Bucket=bucket)
             print("Bucket exists and is readable {bucket}")
         except ClientError as e:
-            error_code = e.response["Error"]["code"]
+            error_code = e.response["Error"]["Code"]
             if error_code == "404":
                 raise ValueError(f"Bucket '{bucket}' does not exist")
             elif error_code == "403":
@@ -27,7 +28,7 @@ class S3Operations:
             print(f"unable to access bucket:{bucket}")
             raise ValueError(f"Unexpected Error :{e}")
 
-    def store_object_in_s3(self, bucket, partition, body):
+    def store_object_in_s3(self, bucket: str, partition: str, body: str) -> str:
         try:
             timestamp = datetime.now()
             # Create partition structure: weather/year=2025/month=10/day=21/
