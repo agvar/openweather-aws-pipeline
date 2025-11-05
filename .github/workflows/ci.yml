@@ -12,5 +12,5 @@ jobs:
     - run: pip install -r requirements-dev.txt
     - run: black --check src/
     - run: flake8 src/
-    - run: mypy src/ --ignore-missing imports --allow-untyped-defs
+    - run: mypy src/ 
     - run: pytest tests/ --cov=src/
