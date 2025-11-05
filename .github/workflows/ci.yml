@@ -13,4 +13,4 @@ jobs:
     - run: black --check src/
     - run: flake8 src/
     - run: mypy src/ 
-    - run: pytest tests/ --cov=src/
+    - run: pytest tests/
