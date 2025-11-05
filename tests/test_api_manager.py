@@ -2,8 +2,7 @@ import pytest
 import requests
 from unittest.mock import Mock,patch
 import sys
-sys.path.append('../src')
-from APIManager import APIManager
+from src.APIManager import APIManager
 
 class TestAPIManager:
 
@@ -27,13 +26,13 @@ class TestAPIManager:
 
         result = self.api_manager.API_get(
             url="https://testapi.weather",
-            params = {"q":"London"}
+            params = {"q":"London"},
             timeout=10
         )
         assert result == mock_response
         mock_get.assert_called_once_with(
             url="https://testapi.weather",
-            params = {"q":"London"}
+            params = {"q":"London"},
             timeout=10
         )
 
