@@ -1,17 +1,19 @@
 from APIManager import APIManager
 from S3Operations import S3Operations
-from dotenv import load_dotenv
-import os
 import yaml
 import json
 from typing import Dict, Any
+import boto3
+import os
 
 
 class WeatherDataCollector:
-    def __init__(self, config_path: str = "../config/config.yaml"):
+    def __init__(self):
         try:
+            self.ssm = boto3.client("ssm")
+            self.config_path= self._get_config_path()
             self.api_key = self._get_api_key()
-            self.config = self.__setup_config(config_path)
+            self.config = self.__setup_config(self.config_path)
             self.geocoding_url = self.config.get("app", {}).get("geocoding_by_zipcode_url")
             self.weather_url = self.config.get("app", {}).get("weather_url")
             self.country_code = self.config.get("app", {}).get("ISO3166_code")
@@ -70,11 +72,16 @@ class WeatherDataCollector:
         except Exception as e:
             raise e
 
+    def _get_config_path(self):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(script_dir,"..","config","config.yaml")
+
     def _get_api_key(self) -> str:
-        load_dotenv("../config/.env")
-        api_key = os.getenv("API_KEY")
+        response = self.ssm.get_parameter(Name="Openweatherapi_key", WithDecryption=True)
+        api_key = response["Parameter"]["Value"]
+        print(f"api key:{api_key}")
         if not api_key:
-            raise ValueError("API key not found")
+            raise ValueError("Weather API key not found")
             exit(1)
         return api_key
 

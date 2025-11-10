@@ -3,11 +3,11 @@
 # Sensitive data (keys, secrets) should be in environment variables or AWS credentials file
 
 aws:
-  region: "us-east-2"  # Change to your preferred region
+  region: "us-east-1"  # Change to your preferred region
   
 s3:
   buckets:
-    source_bucket: "data-analytics-storage-11012024-xyz00exr"  
+    source_bucket: "weatherdatastore-bucket-11-07-2025-12-20-avar"  
   
 dynamodb:
   tables:

@@ -1,0 +1,37 @@
+name : Deploy and Cleanup
+on :
+  workflow_run:
+   workflows: ["CI"]
+   types : [completed]
+   branches: [main]
+
+jobs:
+ deploy-and-test:
+ if: ${{ github.event.workflow_run.conclusion == 'success' }}
+ runs-on: ubuntu-latest
+ steps:
+ -name: Setup Terraform for AWS
+ -uses: actions/checkout@v3
+ -uses: hashicorp/setup-terraform@v2
+
+ -name: Create AWS Resources
+  run: |
+    cd terraform
+    terraform init
+    terraform apply -var="create_ephemeral_resources=true" -auto-approve
+
+-name: Deploy Lambda aws_lambda_function
+ run: |
+    zip -r weather-collector.zip src/
+    aws s3 cp weather-collector.zip s3://weatherdatacode-bucket-11-07-2025-12-20-AM-avar/
+    aws lambda weather_collector_lambda \
+     --function-name weather-data-collector \
+     --s3-bucket s3://weatherdatacode-bucket-11-07-2025-12-20-AM-avar \
+     --s3-key weather-collector.zip
+
+ -name: Destroy Ephemeral Resources
+    run : |
+    cd terraform
+    terraform init
+    terraform apply -var="create_ephemeral_resources=false" -auto-approve
+
