@@ -83,7 +83,7 @@ class WeatherDataCollector:
     def _get_api_key(self) -> str:
         response = self.ssm.get_parameter(Name="Openweatherapi_key", WithDecryption=True)
         api_key = response["Parameter"]["Value"]
-        if not isinstance(api_key, ,str):
+        if not isinstance(api_key, str):
             raise ValueError(f"Expected string from parameter store , got {type(api_key)}")
         if not api_key:
             raise ValueError("Weather API key not found")
