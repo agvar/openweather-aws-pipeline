@@ -2,12 +2,46 @@ provider "aws"{
   region = "us-east-2"
 }
 
+
 variable "create_ephemeral_resources_flag"{
   description = "Create ephemeral resources"
   type = bool
   default = true
 }
+########################################################
+##Federated acess for Github actions using IODC provider
+########################################################
 
+resource "aws_iam_openid_connect_provider" "github_actions"{
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+}
+
+resource "aws_iam_role" "weather_app_role"{
+  name = "github-actions-weather-app"
+  assume_role_policy = jsonencode({
+    Version="2012-10-17"
+    Statement=[
+      {
+        Effect="Allow"
+        Principal={
+          federated = aws_iam_openid_connect_provider.github_actions.arn
+        }
+        Action="sts:AssumeRoleWithWebIdentity"
+        Condition={
+          StringEquals={
+          "token.actions.githubusercontent.com:sub" = "repo:agvar/openweather-aws-pipeline:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+        }
+
+      }
+    ]
+  }
+
+  )
+}
 #################################
 # Persistent resources
 #################################
@@ -19,6 +53,7 @@ resource "aws_s3_bucket" "weatherDataCode"{
 resource "aws_s3_bucket" "weatherDataStore"{
   bucket = "weatherdatastore-bucket-11-07-2025-12-20-AM-avar"
 }
+
 
 resource "aws_iam_role" "lambda_execution_role"{
   name = "weather-lambda-execution-role"
@@ -66,3 +101,44 @@ resource "aws_cloudwatch_log_group" "weather_collector_lambda_logs"{
   retention_in_days = 14
 }
 
+resource "aws_iam_role_policy" "github_actions"{
+  role = aws_iam_role.weather_app_role.arn
+    policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:UpdateFunctionCode",      # Update Lambda code
+          "lambda:GetFunction",             # Check Lambda exists
+          "lambda:InvokeFunction"           # Test Lambda after deploy
+        ]
+        Resource = aws_lambda_function.weather_collector_lambda[0].arn
+      },
+      
+
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",                   # Upload zip files
+          "s3:GetObject"                    # Download if needed
+        ]
+        Resource =aws_s3_bucket.weatherDataCode.arn
+      },
+      
+
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.weatherDataStore.arn,
+          "${aws_s3_bucket.weatherDataStore.arn}/*"
+        ]
+      }]
+  })
+  }
