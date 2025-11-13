@@ -2,48 +2,18 @@ provider "aws"{
   region = "us-east-2"
 }
 
-
 variable "create_ephemeral_resources_flag"{
   description = "Create ephemeral resources"
   type = bool
   default = true
 }
-########################################################
-##Federated acess for Github actions using IODC provider
-########################################################
 
-resource "aws_iam_openid_connect_provider" "github_actions"{
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+data "aws_iam_role" "github_actions_aws"{
+  name="github-actions-weather-app"
 }
 
-resource "aws_iam_role" "weather_app_role"{
-  name = "github-actions-weather-app"
-  assume_role_policy = jsonencode({
-    Version="2012-10-17"
-    Statement=[
-      {
-        Effect="Allow"
-        Principal={
-          federated = aws_iam_openid_connect_provider.github_actions.arn
-        }
-        Action="sts:AssumeRoleWithWebIdentity"
-        Condition={
-          StringEquals={
-          "token.actions.githubusercontent.com:sub" = "repo:agvar/openweather-aws-pipeline:ref:refs/heads/main"
-          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          }
-        }
-
-      }
-    ]
-  }
-
-  )
-}
 #################################
-# Persistent resources
+# List of Persistent resources
 #################################
 
 resource "aws_s3_bucket" "weatherDataCode"{
@@ -73,7 +43,7 @@ resource "aws_iam_role" "lambda_execution_role"{
 }
 
 #################################
-#Ephemeral Resources
+# List of Ephemeral Resources
 #################################
 
 resource "aws_lambda_function" "weather_collector_lambda"{
@@ -102,7 +72,7 @@ resource "aws_cloudwatch_log_group" "weather_collector_lambda_logs"{
 }
 
 resource "aws_iam_role_policy" "github_actions"{
-  role = aws_iam_role.weather_app_role.arn
+    role = data.aws_iam_role.github_actions_aws.id
     policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
