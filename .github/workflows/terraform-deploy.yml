@@ -15,13 +15,10 @@ jobs:
     steps:
     - name : Debug OIDC Github token 
       run : |
-       echo "GITHUB_TOKEN info:"
-       echo "Rep: ${{ github.repository }}"
-       echo "Rep: ${{ github.repository }}"
-       echo "Rep: ${{ github.ref }}"
-       echo "Rep: ${{ github.sha }}"
-       echo "Rep: ${{ github.actor }}"
-       echo "Rep: ${{ github.event_name }}"
+       echo "OIDC Request URL: $ACTIONS_ID_TOKEN_REQUEST_URL"
+       echo "OIDC Request Token: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+       echo "GitHub Repository: $GITHUB_REPOSITORY"
+       echo "GitHub Ref: $GITHUB_REF"
     - name : Configure AWS credentials for github actions
       uses : aws-actions/configure-aws-credentials@v2
       with : 
