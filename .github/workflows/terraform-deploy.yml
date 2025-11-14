@@ -13,7 +13,7 @@ jobs:
      id-token : write
      contents : read
     steps:
-    - name : Configure AWS credentials
+    - name : Configure AWS credentials for github actions
       uses : aws-actions/configure-aws-credentials@v2
       with : 
        role-to-assume : arn:aws:iam::049506468119:role/github-actions-weather-app
