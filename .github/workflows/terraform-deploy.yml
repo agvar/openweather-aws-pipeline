@@ -16,7 +16,7 @@ jobs:
     - name : Configure AWS credentials for github actions
       uses : aws-actions/configure-aws-credentials@v4
       with : 
-       role-to-assume : arn:aws:iam::049506468119:role/github-actions-weather-app
+       role-to-assume : ${{ secrets.AWS_ROLE_ARN }}
        aws-region : us-east-1
        
     - name : checkout code
