@@ -18,7 +18,7 @@ jobs:
       with : 
        role-to-assume : arn:aws:iam::049506468119:role/github-actions-weather-app
        aws-region : us-east-1
-       audience: sts.amazonaws.com
+       
     - name : checkout code
       uses : actions/checkout@v3
     - name : Setup Terraform
