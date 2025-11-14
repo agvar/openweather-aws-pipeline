@@ -14,7 +14,7 @@ jobs:
      contents : read
     steps:
     - name : Configure AWS credentials for github Actions
-      uses : aws-actions/configure-aws-credentials@v2
+      uses : aws-actions/configure-aws-credentials@v4
       with : 
        role-to-assume : arn:aws:iam::049506468119:role/github-actions-weather-app
        aws-region : us-east-1
