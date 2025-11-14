@@ -13,7 +13,7 @@ jobs:
      id-token : write
      contents : read
     steps:
-    - name : Debug OIDC Github token value
+    - name : Debug OIDC Github token
       run : |
        echo "OIDC Request URL: $ACTIONS_ID_TOKEN_REQUEST_URL"
        echo "OIDC Request Token: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
