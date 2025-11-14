@@ -13,11 +13,21 @@ jobs:
      id-token : write
      contents : read
     steps:
+    - name : Debug OIDC Github token 
+      run : |
+       echo "GITHUB_TOKEN info:"
+       echo "Rep: ${{ github.repository }}"
+       echo "Rep: ${{ github.repository }}"
+       echo "Rep: ${{ github.ref }}"
+       echo "Rep: ${{ github.sha }}"
+       echo "Rep: ${{ github.actor }}"
+       echo "Rep: ${{ github.event_name }}"
     - name : Configure AWS credentials for github actions
-      uses : aws-actions/configure-aws-credentials@v4
+      uses : aws-actions/configure-aws-credentials@v2
       with : 
        role-to-assume : ${{ secrets.AWS_ROLE_ARN }}
        aws-region : us-east-1
+       audience: sts.amazonaws.com
        
     - name : checkout code
       uses : actions/checkout@v3
