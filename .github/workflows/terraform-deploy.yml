@@ -20,11 +20,11 @@ jobs:
        echo "GitHub Repository: $GITHUB_REPOSITORY"
        echo "GitHub Ref: $GITHUB_REF"
     - name : Configure AWS credentials for github actions
-      uses : aws-actions/configure-aws-credentials@v2
+      uses : aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
       with : 
        role-to-assume : ${{ secrets.AWS_ROLE_ARN }}
        aws-region : us-east-1
-       audience: sts.amazonaws.com
+       
        
     - name : checkout code
       uses : actions/checkout@v3
