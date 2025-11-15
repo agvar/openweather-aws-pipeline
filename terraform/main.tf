@@ -109,6 +109,20 @@ resource "aws_iam_role_policy" "github_actions"{
           aws_s3_bucket.weatherDataStore.arn,
           "${aws_s3_bucket.weatherDataStore.arn}/*"
         ]
-      }]
+      },
+      {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:DeleteLogGroup",
+        "logs:PutRetentionPolicy"
+      ],
+      Resource: aws_cloudwatch_log_group.weather_collector_lambda_logs[0].arn
+    }
+      ]
   })
   }
