@@ -31,7 +31,7 @@ jobs:
     - name : Setup Terraform
       uses : hashicorp/setup-terraform@v2
 
-    - name: Create AWS Resources
+    - name: Create AWS Resources using terraform
       run: |
        cd terraform
        terraform init
