@@ -24,7 +24,6 @@ resource "aws_s3_bucket" "weatherDataStore"{
   bucket = "weatherdatastore-bucket-11-07-2025-12-20-AM-avar"
 }
 
-
 resource "aws_iam_role" "lambda_execution_role"{
   name = "weather-lambda-execution-role"
   assume_role_policy =  jsonencode({
@@ -65,11 +64,67 @@ resource "aws_cloudwatch_event_rule" "weather_collection_schedule" {
   schedule_expression = "cron(0 6,18 * * ? *)"
 }
 
+resource "aws_cloudwatch_event_target" "trigger_lambda"{
+  count = var.create_ephemeral_resources_flag ? 1 :0 
+  rule = aws_cloudwatch_event_rule.weather_collection_schedule[0].name
+  arn = aws_lambda_function.weather_collector_lambda[0].arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge" {
+  count         = var.create_ephemeral_resources_flag ? 1 : 0
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.weather_collector_lambda[0].function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.weather_collection_schedule[0].arn
+}
+
 resource "aws_cloudwatch_log_group" "weather_collector_lambda_logs"{
   count = var.create_ephemeral_resources_flag ? 1 :0 
   name = "/aws/lambda/weather-collector-lambda-logs"
   retention_in_days = 14
 }
+
+resource "aws_iam_role_policy" "lambda_execution_policy"{
+    role = aws_iam_role.lambda_execution_role.id
+    policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream", 
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    },  
+
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.weatherDataStore.arn,
+          "${aws_s3_bucket.weatherDataStore.arn}/*",
+          aws_s3_bucket.weatherDataCode.arn,
+          "${aws_s3_bucket.weatherDataCode.arn}/*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "ssm:GetParameter"
+        ],
+        "Resource": "arn:aws:ssm:us-east-1:049506468119:parameter/Openweatherapi_key"
+      }
+    ]
+    })
+    }
 
 resource "aws_iam_role_policy" "github_actions"{
     role = data.aws_iam_role.github_actions_aws.id
@@ -85,20 +140,8 @@ resource "aws_iam_role_policy" "github_actions"{
           "lambda:InvokeFunction"           # Test Lambda after deploy
         ]
         Resource = aws_lambda_function.weather_collector_lambda[0].arn
-      },
-      
-
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:PutObject",                   # Upload zip files
-          "s3:GetObject"                    # Download if needed
-        ]
-        Resource =aws_s3_bucket.weatherDataCode.arn
-      },
-      
-
-      {
+      },    
+        {
         Effect = "Allow"
         Action = [
           "s3:PutObject",
@@ -107,22 +150,11 @@ resource "aws_iam_role_policy" "github_actions"{
         ]
         Resource = [
           aws_s3_bucket.weatherDataStore.arn,
-          "${aws_s3_bucket.weatherDataStore.arn}/*"
+          "${aws_s3_bucket.weatherDataStore.arn}/*",
+          aws_s3_bucket.weatherDataCode.arn,
+          "${aws_s3_bucket.weatherDataCode.arn}/*"
         ]
-      },
-      {
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents",
-        "logs:DescribeLogGroups",
-        "logs:DescribeLogStreams",
-        "logs:DeleteLogGroup",
-        "logs:PutRetentionPolicy"
-      ],
-      Resource: aws_cloudwatch_log_group.weather_collector_lambda_logs[0].arn
-    }
+      }
       ]
   })
   }
