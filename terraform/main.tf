@@ -17,11 +17,11 @@ data "aws_iam_role" "github_actions_aws"{
 #################################
 
 resource "aws_s3_bucket" "weatherDataStore"{
-  bucket = "weatherdatastore-bucket-11-07-2025-12-20-avar"
+  bucket = "weather-data-store-bucket-11-07-2025-12-20-avar"
 }
 
 resource "aws_s3_bucket" "weatherDataCode"{
-  bucket = "weatherdatacode-bucket-11-07-2025-12-20-avar"
+  bucket = "weather-data-code-bucket-11-07-2025-12-20-avar"
 }
 
 resource "aws_iam_role" "lambda_execution_role"{
