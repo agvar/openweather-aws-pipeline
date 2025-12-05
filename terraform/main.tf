@@ -13,7 +13,7 @@ data "aws_iam_role" "github_actions_aws"{
 }
 
 #################################
-# Reference List of Persistent resources
+# Refer Persistent resources
 #################################
 
 data "aws_s3_bucket" "weatherDataStore"{
@@ -28,8 +28,9 @@ data "aws_iam_role" "lambda_execution_role"{
   name = "weather-lambda-execution-role"
 }
 
+
 #################################
-# List of Ephemeral Resources
+# Create Ephemeral Resources
 #################################
 
 resource "aws_lambda_function" "weather_collector_lambda"{
@@ -66,27 +67,20 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   source_arn    = aws_cloudwatch_event_rule.weather_collection_schedule[0].arn
 }
 
-resource "aws_cloudwatch_log_group" "weather_collector_lambda_logs"{
-  count = var.create_ephemeral_resources_flag ? 1 :0 
-  name = "/aws/lambda/weather-collector-lambda-logs"
-  retention_in_days = 14
-}
-
 resource "aws_iam_role_policy" "lambda_execution_policy"{
     role = data.aws_iam_role.lambda_execution_role.id
     policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-
     {
       "Effect": "Allow",
       "Action": [
         "logs:CreateLogGroup",
-        "logs:CreateLogStream", 
+        "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
       "Resource": "arn:aws:logs:*:*:*"
-    },  
+    },
 
       {
         Effect = "Allow"
