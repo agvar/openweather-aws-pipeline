@@ -40,10 +40,10 @@ jobs:
     - name: Deploy Lambda aws_lambda_function
       run: |
        zip -r weather-collector.zip src/
-       aws s3 cp weather-collector.zip s3://weatherdatacode-bucket-11-07-2025-12-20-avar/
+       aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
        aws lambda weather_collector_lambda \
        --function-name weather-data-collector \
-       --s3-bucket s3://weatherdatacode-bucket-11-07-2025-12-20-avar \
+       --s3-bucket s3://weather-code-bucket-11-07-2025-12-20-avar \
        --s3-key weather-collector.zip
 
     - name: Destroy Ephemeral Resources

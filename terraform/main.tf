@@ -21,7 +21,7 @@ resource "aws_s3_bucket" "weatherDataStore"{
 }
 
 resource "aws_s3_bucket" "weatherDataCode"{
-  bucket = "weather-data-code-bucket-11-07-2025-12-20-avar"
+  bucket = "weather-code-bucket-11-07-2025-12-20-avar"
 }
 
 resource "aws_iam_role" "lambda_execution_role"{
