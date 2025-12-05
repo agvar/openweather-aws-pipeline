@@ -13,32 +13,19 @@ data "aws_iam_role" "github_actions_aws"{
 }
 
 #################################
-# List of Persistent resources
+# Reference List of Persistent resources
 #################################
 
-resource "aws_s3_bucket" "weatherDataStore"{
+data "aws_s3_bucket" "weatherDataStore"{
   bucket = "weather-data-store-bucket-11-07-2025-12-20-avar"
 }
 
-resource "aws_s3_bucket" "weatherDataCode"{
+data "aws_s3_bucket" "weatherDataCode"{
   bucket = "weather-code-bucket-11-07-2025-12-20-avar"
 }
 
-resource "aws_iam_role" "lambda_execution_role"{
+data "aws_iam_role" "lambda_execution_role"{
   name = "weather-lambda-execution-role"
-  assume_role_policy =  jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-
 }
 
 #################################
@@ -48,11 +35,11 @@ resource "aws_iam_role" "lambda_execution_role"{
 resource "aws_lambda_function" "weather_collector_lambda"{
   count = var.create_ephemeral_resources_flag ? 1 : 0
   function_name="weather-collector-lambda"
-  role = aws_iam_role.lambda_execution_role.arn
+  role = data.aws_iam_role.lambda_execution_role.arn
   handler = "WeatherCollector_lambda_handler.lambda_handler"
   runtime = "python3.9"
   timeout = 300
-  s3_bucket = aws_s3_bucket.weatherDataCode.bucket
+  s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
   s3_key = "weather-collector.zip"
 
 }
@@ -86,7 +73,7 @@ resource "aws_cloudwatch_log_group" "weather_collector_lambda_logs"{
 }
 
 resource "aws_iam_role_policy" "lambda_execution_policy"{
-    role = aws_iam_role.lambda_execution_role.id
+    role = data.aws_iam_role.lambda_execution_role.id
     policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -109,10 +96,10 @@ resource "aws_iam_role_policy" "lambda_execution_policy"{
           "s3:ListBucket"
         ]
         Resource = [
-          aws_s3_bucket.weatherDataStore.arn,
-          "${aws_s3_bucket.weatherDataStore.arn}/*",
-          aws_s3_bucket.weatherDataCode.arn,
-          "${aws_s3_bucket.weatherDataCode.arn}/*"
+          data.aws_s3_bucket.weatherDataStore.arn,
+          "${data.aws_s3_bucket.weatherDataStore.arn}/*",
+          data.aws_s3_bucket.weatherDataCode.arn,
+          "${data.aws_s3_bucket.weatherDataCode.arn}/*"
         ]
       },
       {
