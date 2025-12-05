@@ -12,9 +12,9 @@ data "aws_iam_role" "github_actions_aws"{
   name="github-actions-weather-app"
 }
 
-#################################
+############################
 # Refer Persistent resources
-#################################
+############################
 
 data "aws_s3_bucket" "weatherDataStore"{
   bucket = "weather-data-store-bucket-11-07-2025-12-20-avar"
