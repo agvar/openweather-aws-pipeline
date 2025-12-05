@@ -30,7 +30,7 @@ data "aws_iam_role" "lambda_execution_role"{
 
 
 #################################
-# Create Ephemeral Resources
+# Create and Destroy Ephemeral Resources
 #################################
 
 resource "aws_lambda_function" "weather_collector_lambda"{
