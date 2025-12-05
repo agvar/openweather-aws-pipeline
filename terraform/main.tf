@@ -25,8 +25,7 @@ resource "aws_s3_bucket" "weatherDataStore"{
 }
 
 resource "aws_iam_role" "lambda_execution_role"{
-  name = "weathe
-  r-lambda-execution-role"
+  name = "weather-lambda-execution-role"
   assume_role_policy =  jsonencode({
     Version = "2012-10-17"
     Statement = [
