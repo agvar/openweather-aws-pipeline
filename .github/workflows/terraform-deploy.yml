@@ -13,7 +13,7 @@ jobs:
      id-token : write
      contents : read
     steps:
-    - name : Debug OIDC Github token
+    - name : OIDC Github token
       run : |
        echo "OIDC Request URL: $ACTIONS_ID_TOKEN_REQUEST_URL"
        echo "OIDC Request Token: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
@@ -40,10 +40,10 @@ jobs:
     - name: Deploy Lambda aws_lambda_function
       run: |
        zip -r weather-collector.zip src/
-       aws s3 cp weather-collector.zip s3://weatherdatacode-bucket-11-07-2025-12-20-AM-avar/
+       aws s3 cp weather-collector.zip s3://weatherdatacode-bucket-11-07-2025-12-20-avar/
        aws lambda weather_collector_lambda \
        --function-name weather-data-collector \
-       --s3-bucket s3://weatherdatacode-bucket-11-07-2025-12-20-AM-avar \
+       --s3-bucket s3://weatherdatacode-bucket-11-07-2025-12-20-avar \
        --s3-key weather-collector.zip
 
     - name: Destroy Ephemeral Resources
