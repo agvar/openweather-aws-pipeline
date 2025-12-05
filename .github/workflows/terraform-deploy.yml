@@ -44,9 +44,9 @@ jobs:
 
     - name: Deploy Lambda aws_lambda_function
       run: |
-       aws lambda weather_collector_lambda \
-       --function-name weather-data-collector \
-       --s3-bucket s3://weather-code-bucket-11-07-2025-12-20-avar \
+       aws lambda update-function-code \
+       --function-name weather-collector-lambda \
+       --s3-bucket weather-code-bucket-11-07-2025-12-20-avar \
        --s3-key weather-collector.zip
 
     - name: Destroy Ephemeral Resources
