@@ -25,7 +25,8 @@ resource "aws_s3_bucket" "weatherDataStore"{
 }
 
 resource "aws_iam_role" "lambda_execution_role"{
-  name = "weather-lambda-execution-role"
+  name = "weathe
+  r-lambda-execution-role"
   assume_role_policy =  jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -125,56 +126,3 @@ resource "aws_iam_role_policy" "lambda_execution_policy"{
     ]
     })
     }
-
-resource "aws_iam_role_policy" "github_actions"{
-    role = data.aws_iam_role.github_actions_aws.id
-    policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-
-      {
-        Effect = "Allow"
-        Action = [
-          "lambda:UpdateFunctionCode",      # Update Lambda code
-          "lambda:GetFunction",             # Check Lambda exists
-          "lambda:InvokeFunction"           # Test Lambda after deploy
-        ]
-        Resource = aws_lambda_function.weather_collector_lambda[0].arn
-      },    
-        {
-        Effect = "Allow"
-        Action = [
-          "s3:PutObject",
-          "s3:GetObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          aws_s3_bucket.weatherDataStore.arn,
-          "${aws_s3_bucket.weatherDataStore.arn}/*",
-          aws_s3_bucket.weatherDataCode.arn,
-          "${aws_s3_bucket.weatherDataCode.arn}/*"
-        ]
-      },
-              {
-        Effect = "Allow"
-        Action = [
-          "iam:CreateRole",
-          "iam:GetRole",
-          "iam:DeleteRole",
-          "iam:PutRolePolicy",
-          "iam:GetRolePolicy",
-          "iam:DeleteRolePolicy",
-          "iam:AttachRolePolicy",
-          "iam:DetachRolePolicy",
-          "iam:ListAttachedRolePolicies",
-          "iam:ListRolePolicies",
-          "iam:PassRole"
-        ]
-        Resource = [
-          aws_iam_role.lambda_execution_role.arn,
-          data.aws_iam_role.github_actions_aws.id:policy/*
-        ]
-      }
-      ]
-  })
-  }
