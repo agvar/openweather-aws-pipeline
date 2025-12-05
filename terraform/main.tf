@@ -154,6 +154,26 @@ resource "aws_iam_role_policy" "github_actions"{
           aws_s3_bucket.weatherDataCode.arn,
           "${aws_s3_bucket.weatherDataCode.arn}/*"
         ]
+      },
+              {
+        Effect = "Allow"
+        Action = [
+          "iam:CreateRole",
+          "iam:GetRole",
+          "iam:DeleteRole",
+          "iam:PutRolePolicy",
+          "iam:GetRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListRolePolicies",
+          "iam:PassRole"
+        ]
+        Resource = [
+          aws_iam_role.lambda_execution_role.arn,
+          data.aws_iam_role.github_actions_aws.id:policy/*
+        ]
       }
       ]
   })
