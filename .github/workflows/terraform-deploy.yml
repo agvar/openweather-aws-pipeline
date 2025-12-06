@@ -36,7 +36,7 @@ jobs:
        cd src && zip -r ../weather-collector.zip . && cd .. && zip -r weather-collector.zip config/
        aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
 
-    - name: Create AWS Resources using terraform
+    - name: Create AWS Resources using Terraform
       run: |
        cd terraform
        terraform init
