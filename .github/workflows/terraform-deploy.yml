@@ -49,15 +49,4 @@ jobs:
        --s3-bucket weather-code-bucket-11-07-2025-12-20-avar \
        --s3-key weather-collector.zip
 
-    - name: Remove EventBridge Targets
-      run: |
-       aws events remove-targets \
-       --rule weather-collection-schedule \
-       --ids 1 || true
-
-    - name: Destroy Ephemeral Resources
-      run: |
-       cd terraform
-       terraform init
-       terraform apply -var="create_ephemeral_resources_flag=false" -auto-approve
 
