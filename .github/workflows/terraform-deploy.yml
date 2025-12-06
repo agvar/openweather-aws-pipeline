@@ -33,7 +33,7 @@ jobs:
 
     - name: Deploy code
       run: |
-       zip -r weather-collector.zip src/
+       zip -r weather-collector.zip src/ config/
        aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
 
     - name: Create AWS Resources using terraform
