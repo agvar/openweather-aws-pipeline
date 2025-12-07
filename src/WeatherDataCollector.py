@@ -78,12 +78,11 @@ class WeatherDataCollector:
 
     def _get_config_path(self) -> Any:
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        #check parent dir for local runs
+        # check parent dir for local runs
         config_path = os.path.join(script_dir, "..", "config", "config.yaml")
         if config_path:
             return config_path
-        
-        #check sibling dir for aws lambda run
+        # check sibling dir for aws lambda run
         config_path = os.path.join(script_dir, "config", "config.yaml")
         if config_path:
             return config_path
