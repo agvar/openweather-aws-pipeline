@@ -31,9 +31,11 @@ class S3Operations:
         try:
             timestamp = datetime.now()
             # Create partition structure: weather/year=2025/month=10/day=21/
-            s3_key = f"openweather_api/year={timestamp.year}/"
+            s3_key = (f"openweather_api/year={timestamp.year}/"
             f"month={timestamp.month:02d}/day={timestamp.day:02d}/"
+            f"hour={timestamp.hour:02d}/"
             f"zipcode={partition}/{uuid.uuid4()}.json"
+            )
             response = self.s3_client.put_object(
                 Bucket=bucket,
                 Key=s3_key,
