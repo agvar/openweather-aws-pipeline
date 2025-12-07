@@ -78,7 +78,15 @@ class WeatherDataCollector:
 
     def _get_config_path(self) -> Any:
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(script_dir, "..", "config", "config.yaml")
+        #check parent dir for local runs
+        config_path = os.path.join(script_dir, "..", "config", "config.yaml")
+        if config_path:
+            return config_path
+        
+        #check sibling dir for aws lambda run
+        config_path = os.path.join(script_dir, "config", "config.yaml")
+        if config_path:
+            return config_path
 
     def _get_api_key(self) -> str:
         response = self.ssm.get_parameter(Name="Openweatherapi_key", WithDecryption=True)
