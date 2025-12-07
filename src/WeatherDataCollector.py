@@ -82,7 +82,6 @@ class WeatherDataCollector:
         config_path = os.path.join(script_dir, "..", "config", "config.yaml")
         if os.path.exists(config_path):
             return config_path
-        
         # check sibling dir for aws lambda run
         config_path = os.path.join(script_dir, "config", "config.yaml")
         if os.path.exists(config_path):
