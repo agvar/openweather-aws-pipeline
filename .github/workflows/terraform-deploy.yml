@@ -33,7 +33,8 @@ jobs:
 
     - name: Deploy code and layer
       run: |
-       mkdir =p layer/python
+       rm -rf layer
+       mkdir -p layer/python
        pip install =r requirements/txt -t layer/python/
        cd layer && zip -r ../lambda_layer.zip python/ cd..
        cd src && zip -r ../weather-collector.zip . && cd .. && zip -r weather-collector.zip config/
