@@ -80,11 +80,12 @@ class WeatherDataCollector:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         # check parent dir for local runs
         config_path = os.path.join(script_dir, "..", "config", "config.yaml")
-        if config_path:
+        if os.path.exists(config_path):
             return config_path
+        
         # check sibling dir for aws lambda run
         config_path = os.path.join(script_dir, "config", "config.yaml")
-        if config_path:
+        if os.path.exists(config_path):
             return config_path
 
     def _get_api_key(self) -> str:
