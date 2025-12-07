@@ -2,7 +2,6 @@ provider "aws"{
   region = "us-east-1"
 }
 
-
 data "aws_iam_role" "github_actions_aws"{
   name="github-actions-weather-app"
 }
@@ -52,14 +51,14 @@ resource "aws_cloudwatch_event_rule" "weather_collection_schedule" {
   schedule_expression = "cron(0 6,18 * * ? *)"
  }
 resource "aws_cloudwatch_event_target" "trigger_lambda"{
-  rule = aws_cloudwatch_event_rule.weather_collection_schedule[0].name
-  arn = aws_lambda_function.weather_collector_lambda[0].arn
+  rule = aws_cloudwatch_event_rule.weather_collection_schedule.name
+  arn = aws_lambda_function.weather_collector_lambda.arn
 }
 
 resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.weather_collector_lambda[0].function_name
+  function_name = aws_lambda_function.weather_collector_lambda.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.weather_collection_schedule[0].arn
+  source_arn    = aws_cloudwatch_event_rule.weather_collection_schedule.arn
 }
