@@ -45,7 +45,7 @@ jobs:
       run: |
        cd terraform
        terraform init
-       terraform apply -var="create_ephemeral_resources_flag=true" -auto-approve
+       terraform apply -auto-approve
 
     - name: Deploy Lambda aws_lambda_function
       run: |
