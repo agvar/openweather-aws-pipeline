@@ -2,18 +2,13 @@ provider "aws"{
   region = "us-east-1"
 }
 
-variable "create_ephemeral_resources_flag"{
-  description = "Create ephemeral resources"
-  type = bool
-  default = true
-}
 
 data "aws_iam_role" "github_actions_aws"{
   name="github-actions-weather-app"
 }
 
 ############################
-# Refer Persistent resources
+# Refer Existing resources
 ############################
 
 data "aws_s3_bucket" "weatherDataStore"{
@@ -30,7 +25,7 @@ data "aws_iam_role" "lambda_execution_role"{
 
 
 ########################################
-# Create and Destroy Ephemeral Resources
+# Create Resources
 ########################################
 
 resource "aws_lambda_layer_version" "dependencies_layer"{
@@ -41,7 +36,6 @@ resource "aws_lambda_layer_version" "dependencies_layer"{
 }
 
 resource "aws_lambda_function" "weather_collector_lambda"{
-  count = var.create_ephemeral_resources_flag ? 1 : 0
   function_name="weather-collector-lambda"
   role = data.aws_iam_role.lambda_execution_role.arn
   handler = "WeatherCollector_lambda_handler.lambda_handler"
@@ -53,62 +47,19 @@ resource "aws_lambda_function" "weather_collector_lambda"{
 }
 
 resource "aws_cloudwatch_event_rule" "weather_collection_schedule" {
-  count = var.create_ephemeral_resources_flag ? 1 :0
   name  = "weather-collection-schedule"
   description         = "Trigger weather collection twice daily"
   schedule_expression = "cron(0 6,18 * * ? *)"
  }
 resource "aws_cloudwatch_event_target" "trigger_lambda"{
-  count = var.create_ephemeral_resources_flag ? 1 :0
   rule = aws_cloudwatch_event_rule.weather_collection_schedule[0].name
   arn = aws_lambda_function.weather_collector_lambda[0].arn
 }
 
 resource "aws_lambda_permission" "allow_eventbridge" {
-  count         = var.create_ephemeral_resources_flag ? 1 : 0
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.weather_collector_lambda[0].function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.weather_collection_schedule[0].arn
 }
-
-resource "aws_iam_role_policy" "lambda_execution_policy"{
-    role = data.aws_iam_role.lambda_execution_role.id
-    policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "arn:aws:logs:*:*:*"
-    },
-
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:PutObject",
-          "s3:GetObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          data.aws_s3_bucket.weatherDataStore.arn,
-          "${data.aws_s3_bucket.weatherDataStore.arn}/*",
-          data.aws_s3_bucket.weatherDataCode.arn,
-          "${data.aws_s3_bucket.weatherDataCode.arn}/*"
-        ]
-      },
-      {
-        "Effect": "Allow",
-        "Action": [
-          "ssm:GetParameter"
-        ],
-        "Resource": "arn:aws:ssm:us-east-1:049506468119:parameter/Openweatherapi_key"
-      }
-    ]
-    })
-    }
