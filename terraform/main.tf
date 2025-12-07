@@ -50,9 +50,11 @@ resource "aws_cloudwatch_event_rule" "weather_collection_schedule" {
   description         = "Trigger weather collection twice daily"
   schedule_expression = "cron(0 6,18 * * ? *)"
  }
+
 resource "aws_cloudwatch_event_target" "trigger_lambda"{
   rule = aws_cloudwatch_event_rule.weather_collection_schedule.name
   arn = aws_lambda_function.weather_collector_lambda.arn
+  target_id = "weather-lambda-target"
 }
 
 resource "aws_lambda_permission" "allow_eventbridge" {
