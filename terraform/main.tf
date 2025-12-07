@@ -22,7 +22,6 @@ data "aws_iam_role" "lambda_execution_role"{
   name = "weather-lambda-execution-role"
 }
 
-
 ##################
 # Create Resources
 ##################
