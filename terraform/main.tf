@@ -33,6 +33,13 @@ data "aws_iam_role" "lambda_execution_role"{
 # Create and Destroy Ephemeral Resources
 ########################################
 
+resource "aws_lambda_layer_version" "dependencies_layer"{
+  layer_name= "weather-collector-dependencies"
+  s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
+  s3_key = "lambda_layer.zip"
+  compatible_runtimes = ["python3.9"]
+}
+
 resource "aws_lambda_function" "weather_collector_lambda"{
   count = var.create_ephemeral_resources_flag ? 1 : 0
   function_name="weather-collector-lambda"
@@ -42,7 +49,7 @@ resource "aws_lambda_function" "weather_collector_lambda"{
   timeout = 300
   s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
   s3_key = "weather-collector.zip"
-
+  layers=[aws_lambda_layer_version.dependencies_layer.arn]
 }
 
 resource "aws_cloudwatch_event_rule" "weather_collection_schedule" {
