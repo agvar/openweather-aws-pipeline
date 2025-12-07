@@ -31,9 +31,14 @@ jobs:
     - name : Setup Terraform
       uses : hashicorp/setup-terraform@v2
 
-    - name: Deploy code
+    - name: Deploy code and layer
+      run: |
+        mkdir =p layer/python
+        pip install =r requirements/txt -t layer/python/
+        cd layer && zip -r ../lambda_layer.zip python/ cd..
       run: |
        cd src && zip -r ../weather-collector.zip . && cd .. && zip -r weather-collector.zip config/
+       aws s3 cp lambda_layer.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
        aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
 
     - name: Create AWS Resources using Terraform
