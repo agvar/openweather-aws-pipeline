@@ -23,9 +23,9 @@ data "aws_iam_role" "lambda_execution_role"{
 }
 
 
-########################################
+##################
 # Create Resources
-########################################
+##################
 
 resource "aws_lambda_layer_version" "dependencies_layer"{
   layer_name= "weather-collector-dependencies"
