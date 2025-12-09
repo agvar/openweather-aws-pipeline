@@ -25,8 +25,8 @@ app:
   weather_year_end: 2001
   zipcodes: 
     - "10001"  # Manhattan
-    - "11201"  # Brooklyn Heights
-    - "12084"  # Guilderland
+    #- "11201"  # Brooklyn Heights
+    #- "12084"  # Guilderland
   ISO3166_code: "US" 
   header_user_agent : "WeatherApp/1.0"
   header_accept : "application/json"
