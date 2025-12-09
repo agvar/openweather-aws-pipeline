@@ -28,6 +28,7 @@ class WeatherDataCollector:
             self.TIMEOUT = 10
             self.apiManager = APIManager(self.header_user_agent, self.header_accept)
             self.s3Operations = S3Operations(self.source_bucket, self.region)
+            self.API_DAILY_LIMIT= 10
         except Exception:
             raise
 
