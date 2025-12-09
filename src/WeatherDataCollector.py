@@ -91,7 +91,7 @@ class WeatherDataCollector:
                         self._create_api_request(self,lat,lon,current_day,zipcode)
                         current_day += timedelta(days=1)
                 else:
-                    self._create_api_request(self,lat,lon,datetime.now(),zipcode)
+                    self._create_api_request(self,lat,lon,datetime.now()-timedelta(days=1),zipcode)
         except Exception:
             raise
 
