@@ -27,15 +27,14 @@ class S3Operations:
             print(f"unable to access bucket:{bucket}")
             raise ValueError(f"Unexpected Error :{e}")
 
-    def store_object_in_s3(self, bucket: str, partition: str, body: str) -> str:
+    def store_object_in_s3(self, bucket: str, zipcode: str,year,month,day: str, body: str) -> str:
         try:
             timestamp = datetime.now()
             # Create partition structure: weather/year=2025/month=10/day=21/
             s3_key = (
-                f"openweather_api/year={timestamp.year}/"
-                f"month={timestamp.month:02d}/day={timestamp.day:02d}/"
-                f"hour={timestamp.hour:02d}/"
-                f"zipcode={partition}/{uuid.uuid4()}.json"
+                f"openweather_api/year={year}/"
+                f"month={month}/day={day}/"
+                f"zipcode={zipcode}/{uuid.uuid4()}.json"
             )
             response = self.s3_client.put_object(
                 Bucket=bucket,
@@ -43,7 +42,7 @@ class S3Operations:
                 Body=body,
                 ContentType="application/json",
                 Metadata={
-                    "part_key": partition,
+                    "part_key": zipcode,
                     "collection_time": timestamp.isoformat(),
                     "source": "Openweather_api_response",
                 },
