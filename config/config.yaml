@@ -3,7 +3,7 @@
 # Sensitive data (keys, secrets) should be in environment variables or AWS credentials file
 
 aws:
-  region: "us-east-1"  # Change to your preferred region
+  region: "us-east-1"  
   
 s3:
   buckets:
@@ -11,21 +11,22 @@ s3:
   
 dynamodb:
   tables:
-    main_table: "my-dynamo-table"  # Replace with your actual table name
+    main_table: "my-dynamo-table"  
   
 # Application settings
 app:
   batch_size: 100
   retry_attempts: 3
   log_level: "INFO"
-  weather_url: "https://api.openweathermap.org/data/3.0/onecall"
+  weather_url_day: "https://api.openweathermap.org/data/3.0/onecall/day_summary"
   geocoding_by_zipcode_url: "http://api.openweathermap.org/geo/1.0/zip"
+  weather_historical_flag : false
+  weather_year_start: 2000
+  weather_year_end: 2001
   zipcodes: 
     - "10001"  # Manhattan
-    - "10002"  # Lower East Side
-    - "10003"  # East Village
     - "11201"  # Brooklyn Heights
-    - "11101"  # Long Island City
+    - "12084"  # Guilderland
   ISO3166_code: "US" 
   header_user_agent : "WeatherApp/1.0"
   header_accept : "application/json"

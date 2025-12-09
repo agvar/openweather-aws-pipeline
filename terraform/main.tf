@@ -47,7 +47,7 @@ resource "aws_lambda_function" "weather_collector_lambda"{
 resource "aws_cloudwatch_event_rule" "weather_collection_schedule" {
   name  = "weather-collection-schedule"
   description         = "Trigger weather collection twice daily"
-  schedule_expression = "cron(0 6,18 * * ? *)"
+  schedule_expression = "cron(0 6 * * ? *)"
  }
 
 resource "aws_cloudwatch_event_target" "trigger_lambda"{

@@ -27,7 +27,7 @@ class S3Operations:
             print(f"unable to access bucket:{bucket}")
             raise ValueError(f"Unexpected Error :{e}")
 
-    def store_object_in_s3(self, bucket: str, zipcode: str,year,month,day: str, body: str) -> str:
+    def store_object_in_s3(self, bucket: str, zipcode: str, year, month, day: str, body: str) -> str:
         try:
             timestamp = datetime.now()
             # Create partition structure: weather/year=2025/month=10/day=21/
