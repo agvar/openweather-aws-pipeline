@@ -145,10 +145,15 @@ class WeatherDataCollector:
             )
             weather_json_response = self.apiManager.API_parse_json(weather_response)
             response_date = weather_json_response.get('date')
+
+            if not isinstance(response_date,str):
+                logger.info(f"Invalid date format in reponse:{response_date}")
+                raise ValueError(f"Expected string, got {type(response_date)}")
+            
             if datetime.strptime(response_date, '%Y-%m-%d'):
-                year, month, day = response_date.split("-")
+                response_year, response_month, response_day = response_date.split("-")
                 self.s3Operations.store_object_in_s3(
-                    self.source_bucket, zipcode, year, month, day, json.dumps(weather_json_response)
+                    self.source_bucket, zipcode, response_year, response_month, response_day, json.dumps(weather_json_response)
                 )
                 logger.info(f"api processing complete for zipcode{zipcode} and day :{day}")
             else:
