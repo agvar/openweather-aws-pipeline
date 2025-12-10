@@ -3,6 +3,7 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import uuid
 from .logger_config import get_logger
+
 logger = get_logger(__name__)
 
 
@@ -34,14 +35,8 @@ class S3Operations:
             raise ValueError(f"Unexpected Error :{e}")
 
     def store_object_in_s3(
-            self,
-            bucket: str,
-            zipcode: str,
-            year: str,
-            month: str,
-            day: str,
-            body: str
-            ) -> str:
+        self, bucket: str, zipcode: str, year: str, month: str, day: str, body: str
+    ) -> str:
         try:
             timestamp = datetime.now()
             s3_key = (
@@ -70,7 +65,7 @@ class S3Operations:
                 logger.error(
                     f"S3 Upload failed with status: \
                         {response['ResponseMetadata']['HTTPStatusCode']}"
-                    )
+                )
                 raise ValueError(
                     f"Upload failed with status: {response['ResponseMetadata']['HTTPStatusCode']}"
                 )

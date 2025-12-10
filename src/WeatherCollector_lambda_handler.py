@@ -2,6 +2,7 @@ from .WeatherDataCollector import WeatherDataCollector
 import json
 from typing import Dict, Any
 from .logger_config import get_logger
+
 logger = get_logger(__name__)
 
 
@@ -24,8 +25,5 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         logger.error(f"Error in lambda handler : {str(e)}", exc_info=True)
         return {
             "statusCode": 500,
-            "body": json.dumps({
-                "error": e,
-                "request_id": context.request_id
-            }),
+            "body": json.dumps({"error": e, "request_id": context.request_id}),
         }

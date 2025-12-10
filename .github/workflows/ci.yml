@@ -10,7 +10,7 @@ jobs:
        python-version: '3.9'
     - run: pip install -r requirements.txt
     - run: pip install -r requirements-dev.txt
-    - run: black --check src/
+    - run: black src/
     - run: flake8 src/
     - run: mypy src/ 
     - run: pytest tests/

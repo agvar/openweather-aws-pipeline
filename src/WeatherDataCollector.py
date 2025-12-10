@@ -110,19 +110,15 @@ class WeatherDataCollector:
                     current_day = start_day
                     while current_day <= end_day:
                         logger.info(f"Starting weather data collection for {current_day}")
-                        self._process_api(
-                            lat, lon, current_day, zipcode
-                        )
+                        self._process_api(lat, lon, current_day, zipcode)
                         logger.info(
                             f"Weather data collection for {current_day} completed successfully"
                         )
                         current_day += timedelta(days=1)
                 else:
-                    last_day = datetime.now()-timedelta(days=1)
+                    last_day = datetime.now() - timedelta(days=1)
                     logger.info(f"Starting last day weather data collection for {last_day}")
-                    self._process_api(
-                        lat, lon, last_day, zipcode
-                    )
+                    self._process_api(lat, lon, last_day, zipcode)
                     logger.info(f"Weather data collection for {last_day} completed successfully")
 
         except Exception as e:
@@ -133,27 +129,32 @@ class WeatherDataCollector:
         try:
             logger.info(f"starting api processing for zipcode{zipcode} and day :{day}")
             weather_params = {
-                            "lat": lat,
-                            "lon": lon,
-                            "date": day.strftime('%Y-%m-%d'),
-                            "units": "imperial",
-                            "lang": "en",
-                            "appid": self.api_key,
+                "lat": lat,
+                "lon": lon,
+                "date": day.strftime("%Y-%m-%d"),
+                "units": "imperial",
+                "lang": "en",
+                "appid": self.api_key,
             }
             weather_response = self.apiManager.API_get(
-                            self.weather_url_day, weather_params, self.TIMEOUT
+                self.weather_url_day, weather_params, self.TIMEOUT
             )
             weather_json_response = self.apiManager.API_parse_json(weather_response)
-            response_date = weather_json_response.get('date')
+            response_date = weather_json_response.get("date")
 
-            if not isinstance(response_date,str):
+            if not isinstance(response_date, str):
                 logger.info(f"Invalid date format in reponse:{response_date}")
                 raise ValueError(f"Expected string, got {type(response_date)}")
-            
-            if datetime.strptime(response_date, '%Y-%m-%d'):
+
+            if datetime.strptime(response_date, "%Y-%m-%d"):
                 response_year, response_month, response_day = response_date.split("-")
                 self.s3Operations.store_object_in_s3(
-                    self.source_bucket, zipcode, response_year, response_month, response_day, json.dumps(weather_json_response)
+                    self.source_bucket,
+                    zipcode,
+                    response_year,
+                    response_month,
+                    response_day,
+                    json.dumps(weather_json_response),
                 )
                 logger.info(f"api processing complete for zipcode{zipcode} and day :{day}")
             else:
