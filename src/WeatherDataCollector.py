@@ -2,11 +2,9 @@ from APIManager import APIManager
 from S3Operations import S3Operations
 import yaml
 import json
-from typing import Dict, Any
 import boto3
-import os
 from datetime import datetime, timedelta
-from logger_config import get_logger
+from logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -16,9 +14,8 @@ class WeatherDataCollector:
         logger.info("Initializing WeatherDataCollector")
         try:
             self.ssm = boto3.client("ssm")
-            self.config_path = self._get_config_path()
-            self.api_key = self._get_api_key()
-            self.config = self.__setup_config(self.config_path)
+            self.config = get_config().config
+            self.api_key = get_config().api_key
             self.geocoding_url = self.config.get("app", {}).get("geocoding_by_zipcode_url")
             self.weather_url_day = self.config.get("app", {}).get("weather_url_day")
             self.weather_historical_flag = self.config.get("app", {}).get("weather_historical_flag")
@@ -29,52 +26,17 @@ class WeatherDataCollector:
             self.header_user_agent = self.config.get("app", {}).get("header_user_agent")
             self.header_accept = self.config.get("app", {}).get("header_accept")
             self.source_bucket = self.config.get("s3", {}).get("buckets", {}).get("source_bucket")
+            self.prefix = self.config.get("s3", {}).get("buckets", {}).get("source_prefix")
             self.region = self.config.get("aws", {}).get("region", "us-east-1")
-            self.TIMEOUT = 10
             self.apiManager = APIManager(self.header_user_agent, self.header_accept)
             self.s3Operations = S3Operations(self.source_bucket, self.region)
             self.API_DAILY_LIMIT = 10
+            self.TIMEOUT = 10
 
             logger.info("WeatherDataCollector initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize WeatherDataCollector {str(e)}", exc_info=True)
             raise
-
-    def _get_config_path(self) -> Any:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        # check parent dir for local runs
-        config_path = os.path.join(script_dir, "..", "config", "config.yaml")
-        if os.path.exists(config_path):
-            return config_path
-        # check sibling dir for aws lambda run
-        config_path = os.path.join(script_dir, "config", "config.yaml")
-        if os.path.exists(config_path):
-            return config_path
-
-    def __setup_config(self, config_path: str) -> Dict[str, Any]:
-        try:
-            with open(config_path) as cfile:
-                config = yaml.safe_load(cfile)
-                if not isinstance(config, dict):
-                    logger.error("Configuration file must be Dictionary")
-                    raise ValueError("Configuration file msut be Dictionary")
-                for section, section_vals in config.items():
-                    if not isinstance(section_vals, dict):
-                        logger.error(f"Configuration {section} section must be Dictionary")
-                        raise ValueError(f"Configuration {section} section must be Dictionary")
-                return config
-        except Exception as e:
-            raise e
-
-    def _get_api_key(self) -> str:
-        response = self.ssm.get_parameter(Name="Openweatherapi_key", WithDecryption=True)
-        api_key = response["Parameter"]["Value"]
-        if not isinstance(api_key, str):
-            raise ValueError(f"Expected string from parameter store , got {type(api_key)}")
-        if not api_key:
-            logger.error("Weather API key not found")
-            raise ValueError("Weather API key not found")
-        return api_key
 
     def collect_weather_data(self) -> None:
         logger.info("Starting weather daya collection for all zipcdes")
@@ -149,7 +111,7 @@ class WeatherDataCollector:
             if datetime.strptime(response_date, "%Y-%m-%d"):
                 response_year, response_month, response_day = response_date.split("-")
                 self.s3Operations.store_object_in_s3(
-                    self.source_bucket,
+                    self.prefix,
                     zipcode,
                     response_year,
                     response_month,

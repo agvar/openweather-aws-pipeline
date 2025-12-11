@@ -1,7 +1,7 @@
 from WeatherDataCollector import WeatherDataCollector
 import json
 from typing import Dict, Any
-from logger_config import get_logger
+from logger import get_logger
 
 logger = get_logger(__name__)
 
