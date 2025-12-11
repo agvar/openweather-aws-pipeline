@@ -7,7 +7,10 @@ aws:
   
 s3:
   buckets:
-    source_bucket: "weather-data-store-bucket-11-07-2025-12-20-avar"  
+    source_bucket: "weather-data-store-bucket-11-07-2025-12-20-avar" 
+    source_prefix: "openweather_api"
+    processed_prefix: "processed"
+    processed_file_name: "daily_weather.parquet"
   
 dynamodb:
   tables:
