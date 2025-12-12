@@ -2,6 +2,8 @@ import pytest
 import requests
 from unittest.mock import Mock,patch
 import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from src.APIManager import APIManager
 
 class TestAPIManager:
