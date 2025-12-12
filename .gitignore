@@ -9,10 +9,10 @@ venv/
 ENV/
 .venv/
 *.log
+
 # Environment variables
 .env
 *.env
-*.log
 
 # IDE
 .vscode/
