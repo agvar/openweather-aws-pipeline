@@ -21,8 +21,8 @@ app:
   weather_url_day: "https://api.openweathermap.org/data/3.0/onecall/day_summary"
   geocoding_by_zipcode_url: "http://api.openweathermap.org/geo/1.0/zip"
   weather_historical_flag : true
-  weather_year_start: 2003
-  weather_year_end: 2004
+  weather_year_start: 2005
+  weather_year_end: 2006
   zipcodes: 
     - "10001"  # Manhattan
     #- "11201"  # Brooklyn Heights
