@@ -22,6 +22,11 @@ data "aws_iam_role" "lambda_execution_role"{
   name = "weather-lambda-execution-role"
 }
 
+data "aws_s3_object" "lambda_code" {
+  bucket = data.aws_s3_bucket.weatherDataCode.bucket
+  key    = "weather-collector.zip"
+}
+
 ##################
 # Create Resources
 ##################
@@ -41,6 +46,7 @@ resource "aws_lambda_function" "weather_collector_lambda"{
   timeout = 300
   s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
   s3_key = "weather-collector.zip"
+  source_code_hash = data.aws_s3_object.lambda_code.etag
   layers=[aws_lambda_layer_version.dependencies_layer.arn]
 }
 

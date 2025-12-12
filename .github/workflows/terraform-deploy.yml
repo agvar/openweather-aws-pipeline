@@ -47,11 +47,5 @@ jobs:
        terraform init
        terraform apply -auto-approve
 
-    - name: Deploy Lambda aws_lambda_function
-      run: |
-       aws lambda update-function-code \
-       --function-name weather-collector-lambda \
-       --s3-bucket weather-code-bucket-11-07-2025-12-20-avar \
-       --s3-key weather-collector.zip
 
 
