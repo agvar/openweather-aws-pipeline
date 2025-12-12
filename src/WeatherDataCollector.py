@@ -1,12 +1,12 @@
-from .APIManager import APIManager
-from .S3Operations import S3Operations
+from APIManager import APIManager
+from S3Operations import S3Operations
 import yaml
 import json
 from typing import Dict, Any
 import boto3
 import os
 from datetime import datetime, timedelta
-from .logger_config import get_logger
+from logger_config import get_logger
 
 logger = get_logger(__name__)
 

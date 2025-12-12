@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime
 import uuid
-from .logger_config import get_logger
+from logger_config import get_logger
 
 logger = get_logger(__name__)
 
