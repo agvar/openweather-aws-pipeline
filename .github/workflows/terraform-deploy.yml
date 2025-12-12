@@ -45,6 +45,7 @@ jobs:
       run: |
        cd terraform
        terraform init
+       terraform import aws_lambda_function.weather_collector_lambda weather-collector-lambda
        terraform apply -auto-approve
 
 
