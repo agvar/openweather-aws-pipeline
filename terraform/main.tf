@@ -27,9 +27,9 @@ data "aws_s3_object" "lambda_code" {
   key    = "weather-collector.zip"
 }
 
-###################
+####################
 # Create Resources
-###################
+####################
 
 resource "aws_lambda_layer_version" "dependencies_layer"{
   layer_name= "weather-collector-dependencies"
