@@ -27,7 +27,8 @@ app:
   weather_year_start: 2020
   weather_year_end: 2021
   zipcodes: 
-    - "10001"  # Manhattan
+    - zipcode: "10001"  # Manhattan
+      country_code: "US" 
     #- "11201"  # Brooklyn Heights
     #- "12084"  # Guilderland
   ISO3166_code: "US" 
