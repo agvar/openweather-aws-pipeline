@@ -98,3 +98,4 @@ class WeatherDataCollector:
 
 if __name__ == "__main__":
     weather_app = WeatherDataCollector()
+    weather_app.collect_weather_data('10001', 'US', '2025-12-16')
