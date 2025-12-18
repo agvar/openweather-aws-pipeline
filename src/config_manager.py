@@ -1,5 +1,5 @@
 from typing import Dict, Optional, Any
-from .logger import get_logger
+from logger import get_logger
 import os
 import yaml
 import boto3
