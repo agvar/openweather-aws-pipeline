@@ -32,4 +32,3 @@ terraform.tfvars
 # OS
 .DS_Store
 Thumbs.db
-weather_data_collector.log
