@@ -1,6 +1,6 @@
 import requests
 from typing import Dict, List, Any
-from logger_config import get_logger
+from logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -13,9 +13,8 @@ class APIManager:
 
     def API_get(self, url: str, params: Dict[str, Any], timeout: int) -> requests.Response:
         try:
-            response = self.session.get(url, params=params, timeout=timeout)
             logger.info(f"API GET request to url {url}")
-
+            response = self.session.get(url, params=params, timeout=timeout)
             logger.info(f"API response status: {response.status_code}")
             response.raise_for_status()
 
