@@ -36,7 +36,10 @@ jobs:
        rm -rf layer
        mkdir -p layer/python
        pip install -r requirements.txt -t layer/python/ \
-       --platform manylinux2014_x86_64 --only-binary=:all: --upgrade
+       --platform manylinux2014_x86_64 \
+       --python-version 3.11 \
+       --only-binary=:all: \
+       --upgrade
 
         echo "=== Layer contents ==="
         ls -la layer/python/
