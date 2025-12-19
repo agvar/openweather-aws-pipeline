@@ -30,9 +30,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "body": json.dumps(
                 {
                     "message": "Weather data collection complete",
-                    "zipcode": {zipcode},
-                    "country_code": {country_code},
-                    "process_day": {process_day},
+                    "zipcode": zipcode,
+                    "country_code": country_code,
+                    "process_day": process_day,
                 }
             ),
         }
