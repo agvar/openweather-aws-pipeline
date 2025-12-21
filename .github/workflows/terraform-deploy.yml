@@ -57,6 +57,8 @@ jobs:
       run: |
        cd terraform
        terraform init
+       terraform import aws_dynamodb_table.weather_collection_progress weather_collection_progress 2>/dev/null || true
+       terraform import aws_dynamodb_table.weather_collection_queue weather_collection_queue 2>/dev/null || true
        terraform import aws_lambda_function.weather_collector_lambda weather-collector-lambda 2>/dev/null || true
        terraform import aws_lambda_function.weather_history_gen_lambda weather-history-gen-lambda 2>/dev/null || true
        terraform import aws_lambda_permission.allow_eventbridge weather-collector-lambda/AllowExecutionFromEventBridge 2>/dev/null || true

@@ -31,6 +31,45 @@ data "aws_s3_object" "lambda_code" {
 # Create Resources
 ###################
 
+resource "aws_dynamodb_table" "weather_collection_queue"{
+  name = "weather_collection_queue"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "item_id"
+
+  attribute {
+    name = "item_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "status"
+    type = "S"
+  }
+
+  attribute {
+    name = "date"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name = "status-date-index
+    hash_key = "status"
+    range_key = "date"
+    projection_type = "ALL"
+  }
+}
+
+resource "aws_dynamodb_table" "weather_collection_progress"{
+  name = "weather_collection_progress"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "job_id"
+
+  attribute {
+    name = "job_id"
+    type = "S"
+  }
+}
+
 resource "aws_lambda_layer_version" "dependencies_layer"{
   layer_name= "weather-collector-dependencies"
   s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
