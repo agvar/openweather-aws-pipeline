@@ -31,7 +31,7 @@ data "aws_s3_object" "lambda_code" {
 # Create Resources
 ###################
 
-resource "aws_dynamodb_table" "weather_collection_queue"{
+resource "aws_dynamodb_table" "weather_collection_queue" {
   name = "weather_collection_queue"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "item_id"
@@ -52,7 +52,7 @@ resource "aws_dynamodb_table" "weather_collection_queue"{
   }
 
   global_secondary_index {
-    name = "status-date-index
+    name = "status-date-index"
     hash_key = "status"
     range_key = "date"
     projection_type = "ALL"
