@@ -1,52 +1,46 @@
-from config_manager import get_config
 from typing import Dict, Any, List
 from logger import get_logger
-from datetime import datetime, timedelta
+from config_manager import get_config
+from DynamoDBOperations import DynamoDBOperations
+from models.collection_models import CollectionProgress, CollectionQueueItem
 
 logger = get_logger(__name__)
 
 
-def histGen_lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    config_parms = get_config().config
-    weather_historical_flag: bool = config_parms.get("app", {}).get("weather_historical_flag")
-    weather_year_start: int = int(config_parms.get("app", {}).get("weather_year_start"))
-    weather_year_end: int = int(config_parms.get("app", {}).get("weather_year_end"))
-    zipcodes: List[Dict[str, Any]] = config_parms.get("app", {}).get("zipcodes")
-    weather_days: Dict[str, Any] = {"days": []}
+def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> List[Dict[Any, Any]]:
+    try:
+        config_params = get_config().config
+        weather_historical_flag: bool = config_params.get("app", {}).get("weather_historical_flag")
+        control_table_queue: bool = (
+            config_params.get("dynamodb", {}).get("tables", {}).get("control_table_queue")
+        )
+        control_table_progress: bool = (
+            config_params.get("dynamodb", {}).get("tables", {}).get("control_table_progress")
+        )
 
-    year_start = datetime(weather_year_start, 1, 1)
-    year_end = datetime(weather_year_end, 12, 31)
-    yesterday = datetime.now() - timedelta(days=1)
+        region: str = config_params.get("aws", {}).get("region")
+        dynamodb = DynamoDBOperations(region)
 
-    if not zipcodes:
-        logger.error("No zipcodes to process")
-        raise ValueError("No zipcodes to process in config file ")
+        progress = dynamodb.get_item(control_table_progress, {"job_id": "historical_collection"})
+        if "Item" not in progress:
+            intial_progress_record = {
+                "job_id": "historical_collection",
+                "total_items": 0,
+                "completed_items": 0,
+                "remaining_items": 0,
+                "daily_calls_limit": 950,
+                "daily_calls_used": 0,
+                "status": "in_progress",
+            }
+            dynamodb.put_item(control_table_progress, intial_progress_record)
+            logger.info(f"Inserted intial record into {control_table_progress}")
 
-    for item in zipcodes:
-        zipcode, country_code = item.get("zipcode"), item.get("country_code")
-        if zipcode is None or country_code is None:
-            logger.error(f"Zipcode{zipcode} or contry code{country_code} is missing")
-            raise ValueError(f"Zipcode{zipcode} or contry code{country_code} is missing")
-        if weather_historical_flag:
-            process_day = year_start
-            while process_day <= year_end:
-                weather_days["days"].append(
-                    {
-                        "zipcode": zipcode,
-                        "country_code": country_code,
-                        "process_day": process_day.strftime("%Y-%m-%d"),
-                    }
-                )
-                process_day += timedelta(days=1)
-        else:
-            weather_days["days"].append(
-                {
-                    "zipcode": zipcode,
-                    "country_code": country_code,
-                    "process_day": yesterday.strftime("%Y-%m-%d"),
-                }
-            )
-    if len(weather_days["days"]) <= 0:
-        logger.error("No input for Weather data Generation")
-        raise ValueError(" No zipcodes to process in config file ")
-    return weather_days
+        logger.info(f"Value of key: {progress.get('Item')}")
+        return []
+    except Exception as e:
+        logger.error(f"Error in lambda handler{__name__}", exc_info=True)
+
+
+
+if __name__ == "__main__":
+    histGen_lambda_handler(event={1, 1}, context=None)

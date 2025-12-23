@@ -14,7 +14,8 @@ s3:
   
 dynamodb:
   tables:
-    main_table: "my-dynamo-table"  
+    control_table_queue: "weather_collection_queue"
+    control_table_progress: "weather_collection_progress" 
   
 # Application settings
 app:
