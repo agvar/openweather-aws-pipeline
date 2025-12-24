@@ -3,7 +3,7 @@
 # Sensitive data (keys, secrets) should be in environment variables or AWS credentials file
 
 aws:
-  region: "us-east-1"  
+  region: "us-east-1" 
   
 s3:
   buckets:
@@ -26,12 +26,20 @@ app:
   geocoding_by_zipcode_url: "http://api.openweathermap.org/geo/1.0/zip"
   weather_historical_flag : true
   weather_year_start: 2020
-  weather_year_end: 2021
+  weather_year_end: 2025
   zipcodes: 
     - zipcode: "10001"  # Manhattan
-      country_code: "US" 
-    #- "11201"  # Brooklyn Heights
-    #- "12084"  # Guilderland
+      country_code: "US"
+    - zipcode: "10002"  # Lower East Side
+      country_code: "US"
+    - zipcode: "10003"  # East Village
+      country_code: "US"
+    - zipcode: "11201"  # Brooklyn Heights
+      country_code: "US"
+    - zipcode: "11101"  # Long Island City
+      country_code: "US"
+    - zipcode: "11101"  # Guilderland
+      country_code: "US"
   ISO3166_code: "US" 
   header_user_agent : "WeatherApp/1.0"
   header_accept : "application/json"
