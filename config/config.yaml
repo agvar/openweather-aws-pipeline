@@ -25,8 +25,8 @@ app:
   weather_url_day: "https://api.openweathermap.org/data/3.0/onecall/day_summary"
   geocoding_by_zipcode_url: "http://api.openweathermap.org/geo/1.0/zip"
   weather_historical_flag : true
-  weather_year_start: 2020
-  weather_year_end: 2025
+  weather_start_dt: 2020-01-01
+  weather_end_dt: 2020-01-10
   zipcodes: 
     - zipcode: "10001"  # Manhattan
       country_code: "US"
