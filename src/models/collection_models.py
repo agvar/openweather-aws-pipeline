@@ -2,13 +2,15 @@ from pydantic import BaseModel, Field
 from typing import Optional, Literal, List
 from datetime import datetime
 
+
 class ZipCodeEntry(BaseModel):
-    zip_code : str
+    zip_code: str
     country_code: str
+
 
 class CollectionProgress(BaseModel):
     job_id: str = Field(default="historical_collection")
-    zipcodes :List[ZipCodeEntry]
+    zipcodes: List[ZipCodeEntry]
     total_items: int = Field(ge=0)
     completed_items: int = Field(ge=0, default=0)
     remaining_items: int = Field(ge=0)
@@ -22,7 +24,7 @@ class CollectionProgress(BaseModel):
 class CollectionQueueItem(BaseModel):
     item_id: str = Field(pattern=r"^\d{5}#[A-Z]{2}#\d{4}-\d{2}-\d{2}$")
     zipcode: str = Field(pattern=r"^\d{5}$")
-    country_code: str =Field(pattern=r"^[A-Z]{2}$")
+    country_code: str = Field(pattern=r"^[A-Z]{2}$")
     date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     status: Literal["pending", "completed", "failed"] = "pending"
     retry_count: int = Field(ge=0, le=3, default=0)
