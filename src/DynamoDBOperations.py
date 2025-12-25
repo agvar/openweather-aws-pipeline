@@ -30,7 +30,7 @@ class DynamoDBOperations:
             logger.error(f"Error getting item {key} from {table},{e}", exc_info=True)
             raise
 
-    def query_table(
+    def query_table_all_fields(
         self,
         model_class: Type[T],
         table_nm: str,

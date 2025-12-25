@@ -18,11 +18,11 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
             config_params.get("dynamodb", {}).get("tables", {}).get("control_table_progress")
         )
         zipcodes: List = config_params.get("app", {}).get("zipcodes", {})
-        weather_year_start: int = int(config_params.get("app", {}).get("weather_year_start", {}))
-        weather_year_end: int = int(config_params.get("app", {}).get("weather_year_end", {}))
+        weather_start_dt: str = config_params.get("app", {}).get("weather_start_dt", {})
+        weather_end_dt: str = config_params.get("app", {}).get("weather_end_dt", {})
 
-        year_start_dt = datetime(weather_year_start, 1, 1)
-        year_end_dt = datetime(weather_year_end, 12, 31)
+        start_dt = datetime.strptime(weather_start_dt, "%Y-%m-%d")
+        end_dt = datetime.strptime(weather_end_dt, "%Y-%m-%d")
 
         region: str = config_params.get("aws", {}).get("region")
         dynamodb = DynamoDBOperations(region)
@@ -31,8 +31,8 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
         if check_table_isEmpty:
             logger.info(f"Table {control_table_queue} is empty")
             queue_items = []
-            current = year_start_dt
-            while current <= year_end_dt:
+            current = start_dt
+            while current <= end_dt:
                 for zipcode in zipcodes:
                     zip = zipcode.get("zipcode")
                     country_code = zipcode.get("country_code")
@@ -54,6 +54,7 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
 
             intial_progress_record = CollectionProgress(
                 job_id="historical_collection",
+                zipcodes=zipcodes,
                 total_items=len(queue_items),
                 completed_items=0,
                 remaining_items=len(queue_items),
@@ -85,7 +86,7 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
             return []
         calls_remaining = progress.daily_calls_limit - progress.daily_calls_used
 
-        pending_items: List[Dict[Any, Any]] = dynamodb.query_table(
+        pending_items: List[Dict[Any, Any]] = dynamodb.query_table_all_fields(
             CollectionQueueItem,
             control_table_queue,
             "status: pending",
