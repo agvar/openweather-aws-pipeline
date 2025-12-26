@@ -36,7 +36,7 @@ class DynamoDBOperations:
         table_nm: str,
         index_name: str,
         key_condition_expression: str,
-        expression_attrib_names: Dict[str,str],
+        expression_attrib_names: Dict[str, str],
         expression_attrib_values: Dict[str, str],
         limit_rows: int,
         **kwargs: Optional[Dict[str, str]],
@@ -44,12 +44,12 @@ class DynamoDBOperations:
         try:
             table = self.dynamoDb.Table(table_nm)
             response = table.query(
-                IndexName= index_name,
+                IndexName=index_name,
                 KeyConditionExpression=key_condition_expression,
                 ExpressionAttributeNames=expression_attrib_names,
                 ExpressionAttributeValues=expression_attrib_values,
                 Limit=limit_rows,
-                **kwargs
+                **kwargs,
             )
             items = []
             if "Items" not in response:
@@ -125,22 +125,7 @@ class DynamoDBOperations:
             logger.error(f"Failed to write record from dynamodb {table_nm},{e}", exc_info=True)
             raise
 
-    def delete_and_create_table(
-            self,
-            table_nm: str
-    ) -> bool:
-        try:
-            table_description = self.dynamoDb.describe_Table(TableName=table_nm)['Table']
-            key_schema = table_description.get('KeySchema')
-            attribute_definitions = table_description.get('AttributeDefinitions')
-            billing_mode = table_description.get('BillingModeSummary', {}).get('BillingMode', 'PROVISIONED')
-            global_secondary_indexes = table_description.get('GlobalSecondaryIndexes', [])
-            provisioned_throughput = table_description.get('ProvisionedThroughput', {})
-            self.dynamoDb.delete_Table(TableName=table_nm)
-            return True
-        except Exception as e:
-            logger.error(f"Failed to write record from dynamodb {table_nm},{e}", exc_info=True)
-            raise
+
 if __name__ == "__main__":
     config = get_config().config
     region = config.get("aws", {}).get("region", "us-east-1")
