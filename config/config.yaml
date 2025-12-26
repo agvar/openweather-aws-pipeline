@@ -26,8 +26,8 @@ app:
   geocoding_by_zipcode_url: "http://api.openweathermap.org/geo/1.0/zip"
   weather_historical_flag : true
   daily_call_limit : 950
-  weather_start_dt: 2020-01-01
-  weather_end_dt: 2020-01-02
+  weather_start_dt: "2020-01-01"
+  weather_end_dt: "2020-01-02"
   zipcodes: 
     - zip_code: "10001"  # Manhattan
       country_code: "US"
