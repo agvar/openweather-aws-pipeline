@@ -19,11 +19,11 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
         )
         daily_call_limit = config_params.get("app", {}).get("daily_call_limit", 950)
         zipcodes: List = config_params.get("app", {}).get("zipcodes", [])
-        start_dt: str = config_params.get("app", {}).get("weather_start_dt")
-        end_dt: str = config_params.get("app", {}).get("weather_end_dt")
+        weather_start_dt: str = config_params.get("app", {}).get("weather_start_dt")
+        weather_end_dt: str = config_params.get("app", {}).get("weather_end_dt")
 
-        #start_dt = datetime.strptime(weather_start_dt, "%Y-%m-%d")
-        #end_dt = datetime.strptime(weather_end_dt, "%Y-%m-%d")
+        start_dt = datetime.strptime(weather_start_dt, "%Y-%m-%d").date()
+        end_dt = datetime.strptime(weather_end_dt, "%Y-%m-%d").date()
 
         region: str = config_params.get("aws", {}).get("region")
         dynamodb = DynamoDBOperations(region)
@@ -92,9 +92,9 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
             control_table_queue,
             "status-date-index",
             "#status = :pending",
-            {'#status': 'status'},
+            {"#status": "status"},
             {":pending": "pending"},
-            limit_rows=calls_remaining
+            limit_rows=calls_remaining,
         )
         logger.info(f"Read {len(pending_items)} from {control_table_queue} ")
         return pending_items
