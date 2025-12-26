@@ -23,7 +23,7 @@ class CollectionProgress(BaseModel):
 
 class CollectionQueueItem(BaseModel):
     item_id: str = Field(pattern=r"^\d{5}#[A-Z]{2}#\d{4}-\d{2}-\d{2}$")
-    zipcode: str = Field(pattern=r"^\d{5}$")
+    zip_code: str = Field(pattern=r"^\d{5}$")
     country_code: str = Field(pattern=r"^[A-Z]{2}$")
     date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     status: Literal["pending", "completed", "failed"] = "pending"

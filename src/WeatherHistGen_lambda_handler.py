@@ -17,12 +17,13 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
         control_table_progress: str = (
             config_params.get("dynamodb", {}).get("tables", {}).get("control_table_progress")
         )
-        zipcodes: List = config_params.get("app", {}).get("zipcodes", {})
-        weather_start_dt: str = config_params.get("app", {}).get("weather_start_dt", {})
-        weather_end_dt: str = config_params.get("app", {}).get("weather_end_dt", {})
+        daily_call_limit = config_params.get("app", {}).get("daily_call_limit", 950)
+        zipcodes: List = config_params.get("app", {}).get("zipcodes", [])
+        start_dt: str = config_params.get("app", {}).get("weather_start_dt")
+        end_dt: str = config_params.get("app", {}).get("weather_end_dt")
 
-        start_dt = datetime.strptime(weather_start_dt, "%Y-%m-%d")
-        end_dt = datetime.strptime(weather_end_dt, "%Y-%m-%d")
+        #start_dt = datetime.strptime(weather_start_dt, "%Y-%m-%d")
+        #end_dt = datetime.strptime(weather_end_dt, "%Y-%m-%d")
 
         region: str = config_params.get("aws", {}).get("region")
         dynamodb = DynamoDBOperations(region)
@@ -34,13 +35,13 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
             current = start_dt
             while current <= end_dt:
                 for zipcode in zipcodes:
-                    zip = zipcode.get("zipcode")
+                    zip = zipcode.get("zip_code")
                     country_code = zipcode.get("country_code")
                     current_str = current.strftime("%Y-%m-%d")
                     queue_items.append(
                         CollectionQueueItem(
                             item_id=f"{zip}#{country_code}#{current_str}",
-                            zipcode=zip,
+                            zip_code=zip,
                             country_code=country_code,
                             date=current_str,
                             status="pending",
@@ -58,7 +59,7 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
                 total_items=len(queue_items),
                 completed_items=0,
                 remaining_items=len(queue_items),
-                daily_calls_limit=950,
+                daily_calls_limit=daily_call_limit,
                 daily_calls_used=0,
                 status="in_progress",
             )
@@ -74,9 +75,9 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
         today = datetime.now().date()
         last_run = progress.last_run
         if last_run is None:
-            last_run = datetime(1973, 1, 1)
+            last_run = datetime(1973, 1, 1).date()
         else:
-            last_run = last_run.strptime("%Y-%m-%d")
+            last_run = last_run.strptime("%Y-%m-%d").date()
 
         if today >= last_run:
             progress.daily_calls_used = 0
@@ -89,9 +90,11 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
         pending_items: List[Dict[Any, Any]] = dynamodb.query_table_all_fields(
             CollectionQueueItem,
             control_table_queue,
-            "status: pending",
+            "status-date-index",
+            "#status = :pending",
+            {'#status': 'status'},
             {":pending": "pending"},
-            Limit=calls_remaining,
+            limit_rows=calls_remaining
         )
         logger.info(f"Read {len(pending_items)} from {control_table_queue} ")
         return pending_items
