@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 logger = get_logger(__name__)
 
 
-def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List[Dict[Any, Any]]]:
+def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[Dict[Any, Any]]:
     try:
         config_params = get_config().config
         control_table_queue: str = (
@@ -97,7 +97,11 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[List
             limit_rows=calls_remaining,
         )
         logger.info(f"Read {len(pending_items)} from {control_table_queue} ")
-        return pending_items
+        return {
+            "statusCode": 200,
+            "items": [item.model_dump() for item in pending_items],
+            "count": len(pending_items)
+        }
     except Exception as e:
         logger.error(f"Error in lambda handler{__name__}, {e}", exc_info=True)
         raise
