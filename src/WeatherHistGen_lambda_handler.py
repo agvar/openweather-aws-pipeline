@@ -84,10 +84,14 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[Dict
 
         if progress.daily_calls_used >= progress.daily_calls_limit:
             logger.info(f"Daily limit of {progress.daily_calls_limit} calls reached")
-            return []
+            return {
+                "statusCode": 200,
+                "items": [],
+                "count": 0,
+            }
         calls_remaining = progress.daily_calls_limit - progress.daily_calls_used
 
-        pending_items: List[Dict[Any, Any]] = dynamodb.query_table_all_fields(
+        pending_items: List[CollectionQueueItem] = dynamodb.query_table_all_fields(
             CollectionQueueItem,
             control_table_queue,
             "status-date-index",
@@ -100,7 +104,7 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[Dict
         return {
             "statusCode": 200,
             "items": [item.model_dump() for item in pending_items],
-            "count": len(pending_items)
+            "count": len(pending_items),
         }
     except Exception as e:
         logger.error(f"Error in lambda handler{__name__}, {e}", exc_info=True)
