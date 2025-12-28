@@ -49,7 +49,7 @@ jobs:
         ls -la layer/python/numpy/ 2>/dev/null || echo "numpy/ not found"
             
         cd layer && zip -r ../lambda_layer.zip python/ && cd ..
-        cd src && zip -r ../weather-collector.zip *.py && cd .. && zip -r weather-collector.zip config/
+        cd src && zip -r ../weather-collector.zip . && cd .. && zip -r weather-collector.zip config/
         aws s3 cp lambda_layer.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
         aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
 
