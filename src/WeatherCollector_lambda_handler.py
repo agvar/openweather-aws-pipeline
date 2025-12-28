@@ -20,35 +20,36 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         control_table_queue: str = (
             config_params.get("dynamodb", {}).get("tables", {}).get("control_table_queue")
         )
-        zipcode = event.get("zipcode")
+        zip_code = event.get("zip_code")
         country_code = event.get("country_code")
-        process_day = event.get("process_day")
+        date = event.get("date")
         item_id = event.get("item_id")
-        if zipcode and country_code and process_day:
-            weatherCollector.collect_weather_data(zipcode, country_code, process_day)
+        if zip_code and country_code and date:
+            weatherCollector.collect_weather_data(zip_code, country_code, date)
         else:
             raise ValueError(
-                f"Missing value for zipcode:{zipcode} "
+                f"Missing value for zipcode:{zip_code} "
                 f"country code:{country_code} "
-                f"or process_day:{process_day}"
+                f"or process_day:{date}"
             )
 
-        logger.info("weather data collection completed successfully")
         result = dynamodb.update_item(
             control_table_queue,
             {"item_id": item_id},
-            "SET status= :completed, completed_at = :now",
-            {":completed": "completed", ":now": datetime.now().isoformat()},
+            "SET #status= :completed, completed_at = :now",
+            {'#status': 'status' },
+            {":completed": "completed", ":now": datetime.now().isoformat()}
         )
         if result:
+            logger.info(f'dynamodb update completed for item {item_id}')
             return {
                 "statusCode": 200,
                 "body": json.dumps(
                     {
                         "message": "Weather data collection complete",
-                        "zipcode": zipcode,
+                        "zip_code": zip_code,
                         "country_code": country_code,
-                        "process_day": process_day,
+                        "date": date,
                     }
                 ),
             }
@@ -57,7 +58,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 control_table_queue,
                 {"item_id": item_id},
                 "SET status= :failed, retry_count = retry_count + :inc, error_message= :error",
-                {":failed": "failed", ":inc": 1, ":error": "Error in updating item"},
+                {'#status': 'status'},
+                {":failed": "failed", ":inc": 1, ":error": "Error in updating item"}
             )
             logger.error(f"Error in updating item  of id: {item_id} in {control_table_queue}")
             raise ValueError(f"Error in updating item  of id: {item_id}")
@@ -66,10 +68,25 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             control_table_queue,
             {"item_id": item_id},
             "SET status= :failed, retry_count = retry_count + :inc, error_message= :error",
-            {":failed": "failed", ":inc": 1, ":error": str(e)},
+            {'#status': 'status'},
+            {":failed": "failed", ":inc": 1, ":error": str(e)}
         )
         logger.error(f"Error in lambda handler : {str(e)}", exc_info=True)
         return {
             "statusCode": 500,
             "body": json.dumps({"error": e}),
         }
+    
+if __name__ == "__main__":
+    event={
+                "item_id": "10001#US#2020-01-02",
+                "zip_code": "10001",
+                "country_code": "US",
+                "date": "2020-01-02",
+                "status": "pending",
+                "retry_count": "0",
+                "last_attempt": None,
+                "completed_at": None,
+                "error_message": None
+                }
+    lambda_handler(event,  None)

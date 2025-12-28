@@ -111,13 +111,16 @@ class DynamoDBOperations:
         table_nm: str,
         key: Dict[str, str],
         update_expression: str,
+        expression_attrib_names:Dict[str,str],
         expression_attrib_values: Dict[str, str],
     ) -> bool:
         try:
-            self.dynamoDb.update_item(
+            table = self.dynamoDb.Table(table_nm)
+            table.update_item(
                 TableName=table_nm,
                 Key=key,
                 UpdateExpression=update_expression,
+                ExpressionAttributeNames=expression_attrib_names,
                 ExpressionAttributeValues=expression_attrib_values,
             )
             return True
