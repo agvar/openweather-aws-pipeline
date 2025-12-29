@@ -18,8 +18,8 @@ dependencies= [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = [ "src*" ]
+where = ["src"]
+include = [ "openweather*" ]
 
 [tool.black]
 line-length = 100
