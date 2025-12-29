@@ -1,6 +1,6 @@
-from .S3Operations import S3Operations
-from .logger import get_logger
-from .config_manager import get_config
+from openweather_pipeline.S3Operations import S3Operations
+from openweather_pipeline.logger import get_logger
+from openweather_pipeline.config_manager import get_config
 
 logger = get_logger(__name__)
 

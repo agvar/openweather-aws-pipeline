@@ -1,5 +1,5 @@
-from logger import get_logger
-from config_manager import get_config
+from openweather_pipeline.logger import get_logger
+from openweather_pipeline.config_manager import get_config
 from typing import Dict, Type, TypeVar, Optional, List
 import boto3
 from pydantic import BaseModel, ValidationError

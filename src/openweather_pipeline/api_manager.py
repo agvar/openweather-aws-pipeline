@@ -1,6 +1,6 @@
 import requests
 from typing import Dict, List, Any
-from logger import get_logger
+from openweather_pipeline.logger import get_logger
 
 logger = get_logger(__name__)
 

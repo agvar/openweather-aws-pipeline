@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 import pandas as pd
 from typing import List, Dict, Any, Optional
-from logger import get_logger
+from openweather_pipeline.logger import get_logger
 
 logger = get_logger(__name__)
 

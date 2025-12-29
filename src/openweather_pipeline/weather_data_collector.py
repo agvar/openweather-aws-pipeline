@@ -1,9 +1,9 @@
-from APIManager import APIManager
-from S3Operations import S3Operations
+from openweather_pipeline.APIManager import APIManager
+from openweather_pipeline.S3Operations import S3Operations
 import json
 from datetime import datetime
-from logger import get_logger
-from config_manager import get_config
+from openweather_pipeline.logger import get_logger
+from openweather_pipeline.config_manager import get_config
 from typing import Dict, Tuple
 
 logger = get_logger(__name__)
