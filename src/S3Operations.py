@@ -4,7 +4,7 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import uuid
 import pandas as pd
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -152,4 +152,37 @@ class S3Operations:
             return flattened
         except Exception as e:
             logger.error(f"Failed to flatten JSON object{key}: {str(e)}", exc_info=True)
+            raise
+
+    def list_all_objects(self, source_prefix: str, extension: str) -> Optional[List[str]]:
+        logger.info("Starting listing of all files from s3://{self.bucket}")
+        all_data = []
+        try:
+            if not source_prefix.endswith("/"):
+                source_prefix += "/"
+            logger.info(f"Searching for .{extension} files under {self.bucket}/{source_prefix}...")
+
+            paginator = self.s3_client.get_paginator("list_objects_v2")
+            pages = paginator.paginate(Bucket=self.bucket, Prefix=source_prefix)
+            for page in pages:
+                if "Contents" not in page:
+                    continue
+                for obj in page["Contents"]:
+                    key = obj["Key"]
+                    uri: str = f"s3://{self.bucket}/{key}"
+                    if not key.lower().endswith(f".{extension}") or key.endswith("/"):
+                        continue
+                    logger.info(f"file added to list for key {key}")
+                    all_data.append(uri)
+            if not all_data:
+                logger.error(
+                    f"No files listed under folder: {source_prefix} in bucket {self.bucket}",
+                    exc_info=True,
+                )
+                raise ValueError(
+                    f"No files listed under folder: {source_prefix} in bucket {self.bucket}"
+                )
+            return all_data
+        except Exception as e:
+            logger.error(f"Failed to list objects under {self.bucket}, {e}", exc_info=True)
             raise
