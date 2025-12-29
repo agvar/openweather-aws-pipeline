@@ -112,18 +112,18 @@ class DynamoDBOperations:
         key: Dict[str, str],
         update_expression: str,
         expression_attrib_values: Dict[str, str],
-        expression_attrib_names:Dict[str,str]= None
+        expression_attrib_names: Optional[Dict[str, str]] = None,
     ) -> bool:
         try:
             table = self.dynamoDb.Table(table_nm)
             update_params: Dict = {
-                'Key' : key,
-                'UpdateExpression' : update_expression,
-                'ExpressionAttributeValues': expression_attrib_values
+                "Key": key,
+                "UpdateExpression": update_expression,
+                "ExpressionAttributeValues": expression_attrib_values,
             }
 
             if expression_attrib_names:
-                update_params['ExpressionAttributeNames'] = expression_attrib_names
+                update_params["ExpressionAttributeNames"] = expression_attrib_names
             table.update_item(**update_params)
             return True
         except Exception as e:
