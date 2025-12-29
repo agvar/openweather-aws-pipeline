@@ -20,6 +20,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         control_table_queue: str = (
             config_params.get("dynamodb", {}).get("tables", {}).get("control_table_queue")
         )
+        control_table_progress: str = (
+            config_params.get("dynamodb", {}).get("tables", {}).get("control_table_progress")
+        )
         zip_code = event.get("zip_code")
         country_code = event.get("country_code")
         date = event.get("date")
@@ -33,15 +36,25 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 f"or process_day:{date}"
             )
 
-        result = dynamodb.update_item(
+        result_query = dynamodb.update_item(
             control_table_queue,
             {"item_id": item_id},
             "SET #status= :completed, completed_at = :now",
-            {'#status': 'status' },
-            {":completed": "completed", ":now": datetime.now().isoformat()}
+            {":completed": "completed", ":now": datetime.now().isoformat()},
+            {'#status': 'status' }
         )
-        if result:
-            logger.info(f'dynamodb update completed for item {item_id}')
+        result_progress = dynamodb.update_item(
+            control_table_progress,
+            {"job_id": "historical_collection"},
+            "SET completed_items = completed_items + :inc , daily_calls_used = daily_calls_used + :inc, \
+            remaining_items = remaining_items - :inc ",
+            {":inc": 1}
+            )
+        if result_query and result_progress:
+            logger.info(
+                f'Update complete for {item_id} in {control_table_progress} ,{control_table_queue}'
+                )
+            
             return {
                 "statusCode": 200,
                 "body": json.dumps(
@@ -57,24 +70,25 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             result = dynamodb.update_item(
                 control_table_queue,
                 {"item_id": item_id},
-                "SET status= :failed, retry_count = retry_count + :inc, error_message= :error",
-                {'#status': 'status'},
-                {":failed": "failed", ":inc": 1, ":error": "Error in updating item"}
+                "SET #status = :failed, retry_count = retry_count + :inc, error_message= :error",
+                {":failed": "failed", ":inc": 1, ":error": "Error in updating item"},
+                {'#status': 'status'}
             )
             logger.error(f"Error in updating item  of id: {item_id} in {control_table_queue}")
             raise ValueError(f"Error in updating item  of id: {item_id}")
     except Exception as e:
+
         result = dynamodb.update_item(
             control_table_queue,
             {"item_id": item_id},
-            "SET status= :failed, retry_count = retry_count + :inc, error_message= :error",
-            {'#status': 'status'},
-            {":failed": "failed", ":inc": 1, ":error": str(e)}
+            "SET #status = :failed, retry_count = retry_count + :inc, error_message= :error",
+            {":failed": "failed", ":inc": 1, ":error": str(e)},
+            {'#status': 'status'}
         )
         logger.error(f"Error in lambda handler : {str(e)}", exc_info=True)
         return {
             "statusCode": 500,
-            "body": json.dumps({"error": e}),
+            "body": json.dumps({"error": str(e)}),
         }
     
 if __name__ == "__main__":
