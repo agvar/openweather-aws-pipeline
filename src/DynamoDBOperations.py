@@ -111,18 +111,20 @@ class DynamoDBOperations:
         table_nm: str,
         key: Dict[str, str],
         update_expression: str,
-        expression_attrib_names:Dict[str,str],
         expression_attrib_values: Dict[str, str],
+        expression_attrib_names:Dict[str,str]= None
     ) -> bool:
         try:
             table = self.dynamoDb.Table(table_nm)
-            table.update_item(
-                TableName=table_nm,
-                Key=key,
-                UpdateExpression=update_expression,
-                ExpressionAttributeNames=expression_attrib_names,
-                ExpressionAttributeValues=expression_attrib_values,
-            )
+            update_params: Dict = {
+                'Key' : key,
+                'UpdateExpression' : update_expression,
+                'ExpressionAttributeValues': expression_attrib_values
+            }
+
+            if expression_attrib_names:
+                update_params['ExpressionAttributeNames'] = expression_attrib_names
+            table.update_item(**update_params)
             return True
         except Exception as e:
             logger.error(f"Failed to write record from dynamodb {table_nm},{e}", exc_info=True)
