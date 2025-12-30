@@ -1,4 +1,4 @@
-from openweather_pipeline.S3Operations import S3Operations
+from openweather_pipeline.s3_operations import S3Operations
 from openweather_pipeline.logger import get_logger
 from openweather_pipeline.config_manager import get_config
 

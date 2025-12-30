@@ -1,8 +1,8 @@
-from openweather_pipeline.WeatherDataCollector import WeatherDataCollector
+from openweather_pipeline.weather_data_collector import WeatherDataCollector
 import json
 from typing import Dict, Any
 from openweather_pipeline.logger import get_logger
-from openweather_pipeline.DynamoDBOperations import DynamoDBOperations
+from openweather_pipeline.dynamodb_operations import DynamoDBOperations
 from openweather_pipeline.config_manager import get_config
 from datetime import datetime
 

@@ -1,0 +1,34 @@
+Metadata-Version: 2.4
+Name: openweather-aws-pipeline
+Version: 0.1.0
+Summary: AWS ML pipeline to predict weather for select zipcodes
+Requires-Python: >3.11
+Description-Content-Type: text/markdown
+Requires-Dist: boto3>=1.40.0
+Requires-Dist: python-dotenv>=1.2.0
+Requires-Dist: PyYAML>=6.0.0
+Requires-Dist: requests>=2.32.0
+Requires-Dist: pandas>=2.2.0
+Requires-Dist: pydantic>=2.12.5
+
+# OpenWeather AWS Data Pipeline
+
+A robust weather data collection and storage system using OpenWeatherMap API and AWS services.
+
+## Features
+- Weather data collection from OpenWeatherMap API
+- AWS S3 storage integration
+- Infrastructure as Code with Terraform
+- Environment-based configuration
+
+## Quick Start
+1. Clone repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Set up environment variables (see .env.example)
+4. Run: `python src/WeatherDataCollector.py`
+
+## Tech Stack
+- Python 3.x
+- AWS (S3, IAM)
+- Terraform
+- OpenWeatherMap API

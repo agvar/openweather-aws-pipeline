@@ -1,5 +1,5 @@
-from openweather_pipeline.APIManager import APIManager
-from openweather_pipeline.S3Operations import S3Operations
+from openweather_pipeline.api_manager import APIManager
+from openweather_pipeline.s3_operations import S3Operations
 import json
 from datetime import datetime
 from openweather_pipeline.logger import get_logger

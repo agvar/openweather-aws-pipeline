@@ -1,7 +1,7 @@
 from typing import Dict, Any, List, Optional
 from openweather_pipeline.logger import get_logger
 from openweather_pipeline.config_manager import get_config
-from openweather_pipeline.DynamoDBOperations import DynamoDBOperations
+from openweather_pipeline.dynamodb_operations import DynamoDBOperations
 from openweather_pipeline.models.collection_models import CollectionProgress, CollectionQueueItem
 from datetime import datetime, timedelta
 

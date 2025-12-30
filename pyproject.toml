@@ -19,7 +19,7 @@ dependencies= [
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = [ "openweather*" ]
+include = [ "openweather_pipeline*" ]
 
 [tool.black]
 line-length = 100

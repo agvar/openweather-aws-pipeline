@@ -1,8 +1,8 @@
-from src.config_manager import get_config
-from src.S3Operations import S3Operations
-from src.DynamoDBOperations import DynamoDBOperations
+from openweather_pipeline.config_manager import get_config
+from openweather_pipeline.s3_operations import S3Operations
+from openweather_pipeline.dynamodb_operations import DynamoDBOperations
 from datetime import datetime
-from src.logger import get_logger
+from openweather_pipeline.logger import get_logger
 import json
 
 def update_progress_queue_status() -> None:
