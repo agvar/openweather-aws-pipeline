@@ -41,17 +41,10 @@ jobs:
        --only-binary=:all: \
        --upgrade
 
-        echo "=== Layer contents ==="
-        ls -la layer/python/
-        echo "=== Numpy location ==="
-        find layer/python -name "numpy*" -type d
-        echo "=== Numpy files ==="
-        ls -la layer/python/numpy/ 2>/dev/null || echo "numpy/ not found"
-            
-        cd layer && zip -r ../lambda_layer.zip python/ && cd ..
-        cd src/openweather_pipeline && zip -r ../weather-collector.zip . && cd .. && zip -r weather-collector.zip config/
-        aws s3 cp lambda_layer.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
-        aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
+       cd layer && zip -r ../lambda_layer.zip python/ && cd ..
+       cd src/openweather_pipeline && zip -r ../weather-collector.zip . && cd .. && zip -r weather-collector.zip config/
+       aws s3 cp lambda_layer.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
+       aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
 
     - name: Create AWS Resources using Terraform
       run: |
