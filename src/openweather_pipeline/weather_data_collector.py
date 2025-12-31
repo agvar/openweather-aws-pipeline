@@ -45,7 +45,13 @@ class WeatherDataCollector:
                 geo_response = self.apiManager.API_get(self.geocoding_url, geo_params, self.TIMEOUT)
                 geo_response_json = self.apiManager.API_parse_json(geo_response)
                 lat, lon = geo_response_json.get("lat"), geo_response_json.get("lon")
-                self.zip_to_geocode_map[(zipcode, country_code)] = (lat, lon)
+                if lat and lon:
+                    self.zip_to_geocode_map[(zipcode, country_code)] = (lat, lon)
+                else:
+                    logger.error(f"Missing coordinates for zipcode {zipcode}: {geo_response_json}")
+                raise ValueError(
+                    "Latitude or Longitude not received from url response :{response_geo_json}"
+                )
             else:
                 lat, lon = self.zip_to_geocode_map[(zipcode, country_code)]
                 logger.info(f"Re-using calculated geocode for {zipcode} :{(lat,lon)}")

@@ -1,6 +1,6 @@
 from openweather_pipeline.logger import get_logger
 from openweather_pipeline.config_manager import get_config
-from typing import Dict, Type, TypeVar, Optional, List
+from typing import Dict, Type, TypeVar, Optional, List, Any
 import boto3
 from pydantic import BaseModel, ValidationError
 
@@ -16,7 +16,7 @@ class DynamoDBOperations:
             self.config = get_config().config
             self.dynamoDb = boto3.resource("dynamodb", region_name=region)
         except Exception as e:
-            logger.erorr(f" Exception when initializing DynamoDB {e}", exc_info=True)
+            logger.error(f" Exception when initializing DynamoDB {e}", exc_info=True)
 
     def get_item(self, model_class: Type[T], table_nm: str, key: Dict[str, str]) -> Optional[T]:
         try:
@@ -39,7 +39,7 @@ class DynamoDBOperations:
         expression_attrib_names: Dict[str, str],
         expression_attrib_values: Dict[str, str],
         limit_rows: int,
-        **kwargs: Optional[Dict[str, str]],
+        **kwargs: Any,
     ) -> Optional[List[T]]:
         try:
             table = self.dynamoDb.Table(table_nm)
@@ -109,9 +109,9 @@ class DynamoDBOperations:
     def update_item(
         self,
         table_nm: str,
-        key: Dict[str, str],
+        key: Dict[str, Any],
         update_expression: str,
-        expression_attrib_values: Dict[str, str],
+        expression_attrib_values: Dict[str, Any],
         expression_attrib_names: Optional[Dict[str, str]] = None,
     ) -> bool:
         try:

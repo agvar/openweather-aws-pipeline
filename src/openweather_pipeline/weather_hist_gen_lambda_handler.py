@@ -71,15 +71,17 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[Dict
         progress = dynamodb.get_item(
             CollectionProgress, control_table_progress, {"job_id": "historical_collection"}
         )
-
+        if not progress:
+            logger.error(f"Unable to find {control_table_progress} record for job_id")
+            raise ValueError(f"Unable to find {control_table_progress} record for job_id")
         today = datetime.now().date()
-        last_run = progress.last_run
-        if last_run is None:
-            last_run = datetime(1973, 1, 1).date()
+        last_run_val = progress.last_run
+        if last_run_val is None:
+            last_run_dt = datetime(1973, 1, 1).date()
         else:
-            last_run = last_run.strptime("%Y-%m-%d").date()
+            last_run_dt = datetime.strptime(last_run_val, "%Y-%m-%d").date()
 
-        if today >= last_run:
+        if today >= last_run_dt:
             progress.daily_calls_used = 0
 
         if progress.daily_calls_used >= progress.daily_calls_limit:
@@ -91,7 +93,7 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[Dict
             }
         calls_remaining = progress.daily_calls_limit - progress.daily_calls_used
 
-        pending_items: List[CollectionQueueItem] = dynamodb.query_table_all_fields(
+        pending_items: Optional[List[CollectionQueueItem]] = dynamodb.query_table_all_fields(
             CollectionQueueItem,
             control_table_queue,
             "status-date-index",
@@ -100,12 +102,16 @@ def histGen_lambda_handler(event: Dict[Any, Any], context: Any) -> Optional[Dict
             {":pending": "pending"},
             limit_rows=calls_remaining,
         )
-        logger.info(f"Read {len(pending_items)} from {control_table_queue} ")
-        return {
-            "statusCode": 200,
-            "items": [item.model_dump() for item in pending_items],
-            "count": len(pending_items),
-        }
+        if pending_items:
+            logger.info(f"Read {len(pending_items)} from {control_table_queue} ")
+            return {
+                "statusCode": 200,
+                "items": [item.model_dump() for item in pending_items],
+                "count": len(pending_items),
+            }
+        else:
+            logger.error(f"Error retrieving items from {control_table_queue}", exc_info=True)
+            raise ValueError(f"Error retrieving items from {control_table_queue}")
     except Exception as e:
         logger.error(f"Error in lambda handler{__name__}, {e}", exc_info=True)
         raise
