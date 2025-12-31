@@ -80,7 +80,7 @@ resource "aws_lambda_layer_version" "dependencies_layer"{
 resource "aws_lambda_function" "weather_collector_lambda"{
   function_name="weather-collector-lambda"
   role = data.aws_iam_role.lambda_execution_role.arn
-  handler = "WeatherCollector_lambda_handler.lambda_handler"
+  handler = "weather_collector_lambda_handler.lambda_handler"
   runtime = "python3.11"
   timeout = 300
   s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
@@ -92,7 +92,7 @@ resource "aws_lambda_function" "weather_collector_lambda"{
 resource "aws_lambda_function" "weather_history_gen_lambda"{
   function_name="weather-history-gen-lambda"
   role = data.aws_iam_role.lambda_execution_role.arn
-  handler = "WeatherHistGen_lambda_handler.histGen_lambda_handler"
+  handler = "weather_hist_gen_lambda_handler.histGen_lambda_handler"
   runtime = "python3.11"
   timeout = 300
   s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
