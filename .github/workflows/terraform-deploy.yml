@@ -42,7 +42,7 @@ jobs:
        --upgrade
 
        cd layer && zip -r ../lambda_layer.zip python/ && cd ..
-       cd src/openweather_pipeline && zip -r ../../weather-collector.zip . && cd ../..
+       cd src && zip -r ../weather-collector.zip openweather_pipeline/ && cd ..
        aws s3 cp lambda_layer.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
        aws s3 cp weather-collector.zip s3://weather-code-bucket-11-07-2025-12-20-avar/
 
