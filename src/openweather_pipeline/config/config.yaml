@@ -27,7 +27,7 @@ app:
   weather_historical_flag : true
   daily_call_limit : 950
   weather_start_dt: "2020-01-01"
-  weather_end_dt: "2020-01-02"
+  weather_end_dt: "2020-12-01"
   zipcodes: 
     - zip_code: "10001"  # Manhattan
       country_code: "US"
