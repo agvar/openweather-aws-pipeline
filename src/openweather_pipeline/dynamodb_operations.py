@@ -2,6 +2,7 @@ from openweather_pipeline.logger import get_logger
 from openweather_pipeline.config_manager import get_config
 from typing import Dict, Type, TypeVar, Optional, List, Any
 import boto3
+from boto3.dynamodb.conditions import ConditionBase
 from pydantic import BaseModel, ValidationError
 
 logger = get_logger(__name__)
@@ -111,6 +112,7 @@ class DynamoDBOperations:
         table_nm: str,
         key: Dict[str, Any],
         update_expression: str,
+        condition_expression: Optional[ConditionBase],
         expression_attrib_values: Dict[str, Any],
         expression_attrib_names: Optional[Dict[str, str]] = None,
     ) -> bool:
@@ -124,6 +126,9 @@ class DynamoDBOperations:
 
             if expression_attrib_names:
                 update_params["ExpressionAttributeNames"] = expression_attrib_names
+            if condition_expression:
+                update_params["ConditionExpression"] = condition_expression
+
             table.update_item(**update_params)
             return True
         except Exception as e:
