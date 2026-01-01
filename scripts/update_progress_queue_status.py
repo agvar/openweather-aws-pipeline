@@ -4,6 +4,8 @@ from openweather_pipeline.dynamodb_operations import DynamoDBOperations
 from datetime import datetime
 from openweather_pipeline.logger import get_logger
 import json
+from boto3.dynamodb.conditions import Attr
+from botocore.exceptions import ClientError
 
 def update_progress_queue_status() -> None:
     config_params = get_config().config
@@ -22,68 +24,51 @@ def update_progress_queue_status() -> None:
     s3_object_list = s3Operations.list_all_objects(
             source_prefix=source_prefix, extension='json'
     )
-    logger.info(f"list of s3 objects: {s3_object_list}")
-    exit(0)
+    logger.info(f"Count of s3 objects in list: {len(s3_object_list)}")
     try:
         for object in s3_object_list:
             parts = object.split("/")
             zip_code = parts[7]
-            year, month , day = parts[4], month = parts[5], day = parts[6]
+            year_part, month_part , day_part = parts[4], parts[5], parts[6]
+            year = year_part.split("=")[1]
+            month = month_part.split("=")[1]
+            day = day_part.split("=")[1]
             item_id = f"{zip_code}#US#{year}-{month}-{day}"
-            result_query = dynamodb.update_item(
-            control_table_queue,
-            {"item_id": item_id},
-            "SET #status= :completed, completed_at = :now",
-            {":completed": "completed", ":now": datetime.now().isoformat()},
-            {"#status": "status"},
-            )
-            result_progress = dynamodb.update_item(
-            control_table_progress,
-            {"job_id": "historical_collection"},
-            "SET completed_items = completed_items + :inc , \
-            daily_calls_used = daily_calls_used + :inc, \
-            remaining_items = remaining_items - :inc ",
-            {":inc": 1},
-            )
-            if result_query and result_progress:
-                logger.info(
-                    f"Update complete for {item_id} in {control_table_progress} ,{control_table_queue}"
+            try:
+                result_query = dynamodb.update_item(
+                control_table_queue,
+                {"item_id": item_id},
+                "SET #status= :completed, completed_at = :now",
+                Attr('status').eq('pending') & Attr('item_id').exists(),
+                {":completed": "completed", ":now": datetime.now().isoformat()},
+                {"#status": "status"},
                 )
-                return {
-                    "statusCode": 200,
-                    "body": json.dumps(
-                        {
-                            "message": "Weather data collection complete",
-                            "zip_code": zip_code,
-                            "country_code": "US",
-                            "date": f'{year}-{month}-{day}',
-                        }
-                    ),
-                }
-            else:
-                dynamodb.update_item(
-                    control_table_queue,
-                    {"item_id": item_id},
-                    "SET #status = :failed, retry_count = retry_count + :inc, error_message= :error",
-                    {":failed": "failed", ":inc": 1, ":error": "Error in updating item"},
-                    {"#status": "status"},
-                )
-                logger.error(f"Error in updating item  of id: {item_id} in {control_table_queue}")
-                raise ValueError(f"Error in updating item  of id: {item_id}")
-    except Exception as e:
-        dynamodb.update_item(
-            control_table_queue,
-            {"item_id": item_id},
-            "SET #status = :failed, retry_count = retry_count + :inc, error_message= :error",
-            {":failed": "failed", ":inc": 1, ":error": str(e)},
-            {"#status": "status"},
-        )
-        logger.error(f"Error in lambda handler : {str(e)}", exc_info=True)
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)}),
-        }
 
+                result_progress = dynamodb.update_item(
+                control_table_progress,
+                {"job_id": "historical_collection"},
+                "SET completed_items = completed_items + :inc , \
+                daily_calls_used = daily_calls_used + :inc, \
+                remaining_items = remaining_items - :inc ",
+                {":inc": 1},
+                )
+                if result_query and result_progress:
+                    logger.info(
+                        f"Update complete for {item_id} in {control_table_progress} ,{control_table_queue}"
+                    )
+                else:
+                    logger.error(f"Error in updating item  of id: {item_id} in {control_table_queue}")
+                    raise ValueError(f"Error in updating item  of id: {item_id}")
+            except ClientError as e:
+                if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                    logger.info(f"Skipping update of item_id :{item_id} as it is in a completed status.")
+                    continue
+                else:
+                    raise
+                
+    except Exception as e:
+        logger.error(f"Error : {str(e)}", exc_info=True)
+        raise
 
 if __name__=="__main__":
     update_progress_queue_status()
