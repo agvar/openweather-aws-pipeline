@@ -49,7 +49,6 @@ def update_progress_queue_status() -> None:
                 table_nm=control_table_progress,
                 key={"job_id": "historical_collection"},
                 update_expression="SET completed_items = completed_items + :inc , \
-                daily_calls_used = daily_calls_used + :inc, \
                 remaining_items = remaining_items - :inc ",
                 expression_attrib_values={":inc": 1},
                 )
