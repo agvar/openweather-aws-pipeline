@@ -34,23 +34,24 @@ def update_progress_queue_status() -> None:
             month = month_part.split("=")[1]
             day = day_part.split("=")[1]
             item_id = f"{zip_code}#US#{year}-{month}-{day}"
+
             try:
                 result_query = dynamodb.update_item(
-                control_table_queue,
-                {"item_id": item_id},
-                "SET #status= :completed, completed_at = :now",
-                Attr('status').eq('pending') & Attr('item_id').exists(),
-                {":completed": "completed", ":now": datetime.now().isoformat()},
-                {"#status": "status"},
+                table_nm=control_table_queue,
+                key={"item_id": item_id},
+                update_expression="SET #status= :completed, completed_at = :now",
+                condition_expression=Attr('status').eq('pending') & Attr('item_id').exists(),
+                expression_attrib_values={":completed": "completed", ":now": datetime.now().isoformat()},
+                expression_attrib_names={"#status": "status"},
                 )
 
                 result_progress = dynamodb.update_item(
-                control_table_progress,
-                {"job_id": "historical_collection"},
-                "SET completed_items = completed_items + :inc , \
+                table_nm=control_table_progress,
+                key={"job_id": "historical_collection"},
+                update_expression="SET completed_items = completed_items + :inc , \
                 daily_calls_used = daily_calls_used + :inc, \
                 remaining_items = remaining_items - :inc ",
-                {":inc": 1},
+                expression_attrib_values={":inc": 1},
                 )
                 if result_query and result_progress:
                     logger.info(
