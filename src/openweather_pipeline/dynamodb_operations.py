@@ -112,8 +112,8 @@ class DynamoDBOperations:
         table_nm: str,
         key: Dict[str, Any],
         update_expression: str,
-        condition_expression: Optional[ConditionBase],
         expression_attrib_values: Dict[str, Any],
+        condition_expression: Optional[ConditionBase] = None,
         expression_attrib_names: Optional[Dict[str, str]] = None,
     ) -> bool:
         try:
