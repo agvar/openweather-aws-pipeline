@@ -49,7 +49,7 @@ Automated weather data pipeline collecting 6 years of historical data (2020-2025
 - mypy, black, flake8
 - Modular architecture (config manager, operations classes)
 
-**Planned:**
+**Planned Changes:**
 - PyTorch/scikit-learn (ML models)
 - AWS Bedrock (LLM integration)
 - React + TypeScript (frontend)
