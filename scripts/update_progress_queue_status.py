@@ -28,8 +28,9 @@ def update_progress_queue_status() -> None:
     try:
         for object in s3_object_list:
             parts = object.split("/")
-            zip_code = parts[7]
+            zip_code_part = parts[7]
             year_part, month_part , day_part = parts[4], parts[5], parts[6]
+            zip_code = zip_code_part.split("=")[1]
             year = year_part.split("=")[1]
             month = month_part.split("=")[1]
             day = day_part.split("=")[1]
