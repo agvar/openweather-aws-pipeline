@@ -70,6 +70,17 @@ resource "aws_dynamodb_table" "weather_collection_progress"{
   }
 }
 
+resource "aws_dynamodb_table" "weather_geocode_cache"{
+  name = "weather_geocode_cache"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "zip_code"
+
+  attribute {
+    name = "country_code"
+    type = "S"
+  }
+}
+
 resource "aws_lambda_layer_version" "dependencies_layer"{
   layer_name= "weather-collector-dependencies"
   s3_bucket = data.aws_s3_bucket.weatherDataCode.bucket
