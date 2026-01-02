@@ -57,7 +57,7 @@ Automated weather data pipeline collecting 6 years of historical data (2020-2025
 
 ## 📊 Key Features
 
-✅ **Rate-Limited Historical Collection**: Queue-based system processing 10,950+ data points (5 locations × 2,191 days) within API constraints
+✅ **Rate-Limited Historical Collection**: Queue-based system processing 13,152+ data points (6 locations × 6 years) within API constraints
 
 ✅ **Production Patterns**: Singleton config manager, validated DynamoDB operations, idempotent Lambda handlers
 
