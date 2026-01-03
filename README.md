@@ -99,11 +99,11 @@ python -m openweather_pipeline.weather_data_collector
 
 ## 📈 Roadmap
 
-- [white_check_mark] Complete historical data collection (6 years × 5 locations)
-- [ ] Time-series feature engineering pipeline
-- [ ] LSTM temperature prediction model
-- [ ] AWS Bedrock LLM integration for explanations
-- [ ] REST API with API Gateway
-- [ ] React dashboard with prediction visualization
-- [ ] Unit tests with moto (AWS mocking)
+- [✅] Complete historical data collection (6 years × 5 locations)
+- [  ] Time-series feature engineering pipeline
+- [  ] LSTM temperature prediction model
+- [  ] AWS Bedrock LLM integration for explanations
+- [  ] REST API with API Gateway
+- [  ] React dashboard with prediction visualization
+- [  ] Unit tests with moto (AWS mocking)
 
