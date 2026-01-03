@@ -7,6 +7,8 @@ from openweather_pipeline.logger import get_logger
 from openweather_pipeline.config_manager import get_config
 from openweather_pipeline.models.collection_models import CollectionGeocodeCache
 from decimal import Decimal
+from boto3.dynamodb.conditions import Attr
+from botocore.exceptions import ClientError
 
 logger = get_logger(__name__)
 
@@ -31,15 +33,70 @@ class WeatherDataCollector:
             self.geocode_cache_table = (
                 self.config.get("dynamodb", {}).get("tables", {}).get("geocode_cache_table")
             )
+            self.control_table_queue: str = (
+            self.config.get("dynamodb", {}).get("tables", {}).get("control_table_queue")
+            )
+            control_table_progress: str = (
+            self.config.get("dynamodb", {}).get("tables", {}).get("control_table_progress")
+            )
 
             logger.info(f"WeatherDataCollector initialized successfully.{self.geocode_cache_table}")
         except Exception as e:
             logger.error(f"Failed to initialize WeatherDataCollector {str(e)}", exc_info=True)
             raise
 
-    def collect_weather_data(self, zip_code: str, country_code: str, process_day: str) -> None:
+    def collect_weather_data(self, zip_code: str, country_code: str, process_day: str, item_id: str) -> None:
 
         logger.info(f"Starting geocoding for zipcode{zip_code} country_code{country_code}")
+        try:
+            lat,lon = self.get_geocoding_by_zipcode(zip_code,country_code)
+            logger.info(f"starting api for day:{process_day}")
+            weather_params = {
+                "lat": lat,
+                "lon": lon,
+                "date": process_day,
+                "units": "imperial",
+                "lang": "en",
+                "appid": self.api_key,
+            }
+            weather_response = self.apiManager.API_get(
+                self.weather_url_day, weather_params, self.TIMEOUT
+            )
+            weather_json_response = self.apiManager.API_parse_json(weather_response)
+            response_date = weather_json_response.get("date")
+
+            if not isinstance(response_date, str):
+                logger.info(f"Invalid date format in reponse:{response_date}")
+                raise ValueError(f"Expected string, got {type(response_date)}")
+
+            if datetime.strptime(response_date, "%Y-%m-%d"):
+                response_year, response_month, response_day = response_date.split("-")
+                self.s3Operations.store_object_in_s3(
+                    self.prefix,
+                    zip_code,
+                    response_year,
+                    response_month,
+                    response_day,
+                    json.dumps(weather_json_response),
+                )
+                logger.info(
+                    f"api processing complete for zipcode{zip_code}, \
+                    country_code{country_code} and day :{response_day}"
+                )
+            else:
+                raise ValueError(
+                    f"Weather API response does not return date key, \
+                    or the format{response_date} is incorrect"
+                )
+            logger.info(f"Weather data collection for {process_day} completed successfully")
+            logger.info(f"Starting dynamodb status table updates")
+            self.dynamodb_update_progress_status(item_id)
+
+        except Exception as e:
+            logger.error(f"Error weather data collection {str(e)}", exc_info=True)
+            raise
+    
+    def get_geocoding_by_zipcode(self,zip_code: str, country_code: str)-> tuple[Decimal,Decimal]:
         try:
             geocode_item = self.dynamodb.get_item(
                 model_class=CollectionGeocodeCache,
@@ -48,6 +105,7 @@ class WeatherDataCollector:
             )
             if geocode_item:
                 lat, lon = geocode_item.latitude, geocode_item.longitude
+                logger.info(f"Reusing lat,lon {(lat,lon)} for {zip_code} {country_code}")
             else:
                 geo_params = {
                     "zip": f"{zip_code},{country_code}",
@@ -90,53 +148,61 @@ class WeatherDataCollector:
                     raise ValueError(
                         "Latitude or Longitude not received from url response :{response_geo_json}"
                     )
-
-            logger.info(
-                f"starting weather api for zipcode{zip_code},"
-                f"country_cde {country_code} and day :{process_day}"
-            )
-            weather_params = {
-                "lat": lat,
-                "lon": lon,
-                "date": process_day,
-                "units": "imperial",
-                "lang": "en",
-                "appid": self.api_key,
-            }
-            weather_response = self.apiManager.API_get(
-                self.weather_url_day, weather_params, self.TIMEOUT
-            )
-            weather_json_response = self.apiManager.API_parse_json(weather_response)
-            response_date = weather_json_response.get("date")
-
-            if not isinstance(response_date, str):
-                logger.info(f"Invalid date format in reponse:{response_date}")
-                raise ValueError(f"Expected string, got {type(response_date)}")
-
-            if datetime.strptime(response_date, "%Y-%m-%d"):
-                response_year, response_month, response_day = response_date.split("-")
-                self.s3Operations.store_object_in_s3(
-                    self.prefix,
-                    zip_code,
-                    response_year,
-                    response_month,
-                    response_day,
-                    json.dumps(weather_json_response),
-                )
-                logger.info(
-                    f"api processing complete for zipcode{zip_code}, \
-                    country_code{country_code} and day :{response_day}"
-                )
-            else:
-                raise ValueError(
-                    f"Weather API response does not return date key, \
-                    or the format{response_date} is incorrect"
-                )
-            logger.info(f"Weather data collection for {process_day} completed successfully")
+            return (lat,lon)
         except Exception as e:
             logger.error(f"Error weather data collection {str(e)}", exc_info=True)
             raise
+        
+    def dynamodb_update_progress_status(self,item_id: str):
+        try:
+            self.dynamodb.update_item(
+            table_nm=self.control_table_queue,
+            key={"item_id": item_id},
+            update_expression="SET #status= :completed, completed_at = :now",
+            condition_expression=Attr('status').eq('pending') & Attr('item_id').exists(),
+            expression_attrib_values={":completed": "completed", ":now": datetime.now().isoformat()},
+            expression_attrib_names={"#status": "status"},
+            )
+            logger.info(f"Updated item_id :{item_id} in {self.control_table_queue} .")
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                    logger.info(f"Skipping update of item_id :{item_id} as it is in a completed status.")
+                    return
+            else:
+                self.dynamodb.update_item(
+                    table_nm=self.control_table_queue,
+                    key={"item_id": item_id},
+                    update_expression="SET #status = :failed, retry_count = retry_count + :inc, \
+                    error_message= :error",
+                    expression_attrib_values={":failed": "failed", ":inc": 1, ":error": str(e)},
+                    expression_attrib_names={"#status": "status"},
+                )
+                logger.error(f"Error in lambda handler : {str(e)}", exc_info=True)
+                raise
+        except Exception as e:
+            self.dynamodb.update_item(
+                    table_nm=self.control_table_queue,
+                    key={"item_id": item_id},
+                    update_expression="SET #status = :failed, retry_count = retry_count + :inc, \
+                    error_message= :error",
+                    expression_attrib_values={":failed": "failed", ":inc": 1, ":error": str(e)},
+                    expression_attrib_names={"#status": "status"},
+                )
+            logger.error(f"Error in lambda handler : {str(e)}", exc_info=True)
+            raise
 
+        try:
+            self.dynamodb.update_item(
+            table_nm=self.control_table_progress,
+            key={"job_id": "historical_collection"},
+            update_expression="SET completed_items = completed_items + :inc , \
+            remaining_items = remaining_items - :inc ",
+            expression_attrib_values={":inc": 1},
+            )
+            logger.info(f"Updated item_id :{item_id} in {self.control_table_progress} .")
+        except Exception as e:
+            logger.error(f"Error weather data collection {str(e)}", exc_info=True)
+            raise
 
 if __name__ == "__main__":
     weather_app = WeatherDataCollector()
