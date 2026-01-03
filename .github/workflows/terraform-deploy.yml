@@ -56,7 +56,7 @@ jobs:
        terraform import aws_lambda_function.weather_history_gen_lambda weather-history-gen-lambda 2>/dev/null || true
        terraform import aws_lambda_permission.allow_eventbridge weather-collector-lambda/AllowExecutionFromEventBridge 2>/dev/null || true
        terraform import aws_cloudwatch_event_rule.weather_collection_schedule weather-collection-schedule 2>/dev/null || true
-       terraform import aws_cloudwatch_event_target.trigger_state_function weather-collection-schedule/weather-data-load-state-function 2>/dev/null || true
+       terraform import aws_cloudwatch_event_target.trigger_state_function weather-collection-schedule/WeatherDataLoad 2>/dev/null || true
        terraform apply -auto-approve
 
 
