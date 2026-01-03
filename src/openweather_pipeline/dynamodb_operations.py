@@ -28,7 +28,7 @@ class DynamoDBOperations:
             item = model_class(**response["Item"])
             return item
         except Exception as e:
-            logger.error(f"Error getting item {key} from {table},{e}", exc_info=True)
+            logger.error(f"Error getting item {key} from {table_nm},{e}", exc_info=True)
             raise
 
     def query_table_all_fields(

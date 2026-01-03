@@ -74,7 +74,13 @@ resource "aws_dynamodb_table" "weather_geocode_cache"{
   name = "weather_geocode_cache"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "zip_code"
+  range_key= "country_code"
 
+  attribute {
+    name = "zip_code"
+    type = "S"
+  }
+  
   attribute {
     name = "country_code"
     type = "S"

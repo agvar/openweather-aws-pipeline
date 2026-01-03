@@ -31,3 +31,12 @@ class CollectionQueueItem(BaseModel):
     last_attempt: Optional[str] = None
     completed_at: Optional[str] = None
     error_message: Optional[str] = None
+
+
+class CollectionGeocodeCache(BaseModel):
+    zip_code: str = Field(pattern=r"^\d{5}$")
+    country_code: str = Field(pattern=r"^[A-Z]{2}$")
+    latitude: float
+    longitude: float
+    name: Optional[str]
+    country: Optional[str]

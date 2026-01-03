@@ -1,10 +1,11 @@
 from openweather_pipeline.api_manager import APIManager
 from openweather_pipeline.s3_operations import S3Operations
+from openweather_pipeline.dynamodb_operations import DynamoDBOperations
 import json
 from datetime import datetime
 from openweather_pipeline.logger import get_logger
 from openweather_pipeline.config_manager import get_config
-from typing import Dict, Tuple
+from openweather_pipeline.models.collection_models import CollectionGeocodeCache
 
 logger = get_logger(__name__)
 
@@ -24,47 +25,74 @@ class WeatherDataCollector:
             self.region = self.config.get("aws", {}).get("region", "us-east-1")
             self.apiManager = APIManager(self.header_user_agent, self.header_accept)
             self.s3Operations = S3Operations(self.source_bucket, self.region)
-            self.API_DAILY_LIMIT = 10
+            self.dynamodb = DynamoDBOperations(self.region)
             self.TIMEOUT = 10
-            self.zip_to_geocode_map: Dict[Tuple[str, str], Tuple[float, float]] = {}
+            self.geocode_cache_table = (
+                self.config.get("dynamodb", {}).get("tables", {}).get("geocode_cache")
+            )
 
             logger.info("WeatherDataCollector initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize WeatherDataCollector {str(e)}", exc_info=True)
             raise
 
-    def collect_weather_data(self, zipcode: str, country_code: str, process_day: str) -> None:
+    def collect_weather_data(self, zip_code: str, country_code: str, process_day: str) -> None:
 
-        logger.info(f"Starting weather day collection for zipcode{zipcode} and day{process_day}")
+        logger.info(f"Starting geocoding for zipcode{zip_code} country_code{country_code}")
         try:
-            if self.zip_to_geocode_map.get((zipcode, country_code)) is None:
+            geocode_item = self.dynamodb.get_item(
+                model_class=CollectionGeocodeCache,
+                table_nm=self.geocode_cache_table,
+                key={"zip_code": zip_code, "country_code": country_code},
+            )
+            if geocode_item:
+                lat, lon = geocode_item.latitude, geocode_item.longitude
+            else:
                 geo_params = {
-                    "zip": f"{zipcode},{country_code}",
+                    "zip": f"{zip_code},{country_code}",
                     "appid": self.api_key,
                 }
                 geo_response = self.apiManager.API_get(self.geocoding_url, geo_params, self.TIMEOUT)
                 geo_response_json = self.apiManager.API_parse_json(geo_response)
-                logger.info(f" geocode json response:{geo_response_json}")
-                lat, lon = geo_response_json.get("lat"), geo_response_json.get("lon")
-                if lat and lon:
-                    self.zip_to_geocode_map[(zipcode, country_code)] = (lat, lon)
-                    logger.info(f" (lat, lon):{self.zip_to_geocode_map[(zipcode, country_code)]}")
-                else:
-                    logger.error(f"Missing coordinates for zipcode {zipcode}: {geo_response_json}")
-                    raise ValueError(
-                    "Latitude or Longitude not received from url response :{response_geo_json}"
-                )
-            else:
-                lat, lon = self.zip_to_geocode_map[(zipcode, country_code)]
-                logger.info(f"Re-using calculated geocode for {zipcode} :{(lat,lon)}")
 
-            if lat is None or lon is None:
-                logger.error(f"Missing coordinates for zipcode {zipcode}: {geo_response_json}")
-                raise ValueError(
-                    "Latitude or Longitude not received from url response :{geo_response_json}"
-                )
-            
-            logger.info(f"starting weather api for zipcode{zipcode} and day :{process_day}")
+                if geo_response_json is None:
+                    logger.error(
+                        f"Missing geocode response for zipcode {zip_code}: {geo_response_json}"
+                    )
+                    raise ValueError(
+                        "Missing geocode response for zipcode {zip_code},"
+                        " country_cde {country_code}"
+                    )
+                else:
+                    lat_response = geo_response_json.get("lat")
+                    lon_response = geo_response_json.get("lon")
+                    name_response = geo_response_json.get("name")
+                    country_response = geo_response_json.get("name")
+
+                if lat_response is not None and lon_response is not None:
+                    geocode_record = CollectionGeocodeCache(
+                        zip_code=zip_code,
+                        country_code=country_code,
+                        latitude=lat_response,
+                        longitude=lon_response,
+                        name=name_response,
+                        country=country_response,
+                    )
+                    self.dynamodb.put_item(
+                        model_instance=geocode_record,
+                        table_nm=self.geocode_cache_table,
+                    )
+                    logger.info(f" (lat, lon):{(zip_code, country_code)}")
+                else:
+                    logger.error(f"Missing coordinates for zipcode {zip_code}: {geo_response_json}")
+                    raise ValueError(
+                        "Latitude or Longitude not received from url response :{response_geo_json}"
+                    )
+
+            logger.info(
+                f"starting weather api for zipcode{zip_code}, \
+                country_cde {country_code} and day :{process_day}"
+            )
             weather_params = {
                 "lat": lat,
                 "lon": lon,
@@ -87,13 +115,16 @@ class WeatherDataCollector:
                 response_year, response_month, response_day = response_date.split("-")
                 self.s3Operations.store_object_in_s3(
                     self.prefix,
-                    zipcode,
+                    zip_code,
                     response_year,
                     response_month,
                     response_day,
                     json.dumps(weather_json_response),
                 )
-                logger.info(f"api processing complete for zipcode{zipcode} and day :{response_day}")
+                logger.info(
+                    f"api processing complete for zipcode{zip_code}, \
+                    country_code{country_code} and day :{response_day}"
+                )
             else:
                 raise ValueError(
                     f"Weather API response does not return date key, \
