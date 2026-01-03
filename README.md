@@ -4,7 +4,7 @@ Enterprise-grade weather data collection and ML prediction system with end-to-en
 
 ## 🎯 Project Overview
 
-Automated weather data pipeline collecting 6 years of historical data (2020-2025) across 5 NYC locations, with planned ML forecasting and LLM-powered explanations. Built with production-ready practices: type safety, validation, CI/CD, and infrastructure as code.
+Automated weather data pipeline collecting 6 years of historical data (2020-2025) across 5 NYC locations,and one NY state location with planned ML forecasting and LLM-powered explanations. Built with production-ready practices: type safety, validation, CI/CD, and infrastructure as code.
 
 ## 🏗️ Architecture
 
