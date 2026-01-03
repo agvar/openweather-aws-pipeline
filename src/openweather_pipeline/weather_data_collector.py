@@ -6,6 +6,7 @@ from datetime import datetime
 from openweather_pipeline.logger import get_logger
 from openweather_pipeline.config_manager import get_config
 from openweather_pipeline.models.collection_models import CollectionGeocodeCache
+from decimal import Decimal
 
 logger = get_logger(__name__)
 
@@ -83,6 +84,7 @@ class WeatherDataCollector:
                         table_nm=self.geocode_cache_table,
                     )
                     logger.info(f" (lat, lon):{(zip_code, country_code)}")
+                    lat, lon = Decimal(lat_response), Decimal(lon_response)
                 else:
                     logger.error(f"Missing coordinates for zipcode {zip_code}: {geo_response_json}")
                     raise ValueError(
@@ -90,8 +92,8 @@ class WeatherDataCollector:
                     )
 
             logger.info(
-                f"starting weather api for zipcode{zip_code}, \
-                country_cde {country_code} and day :{process_day}"
+                f"starting weather api for zipcode{zip_code},"
+                f"country_cde {country_code} and day :{process_day}"
             )
             weather_params = {
                 "lat": lat,
