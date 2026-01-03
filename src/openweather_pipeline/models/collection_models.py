@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, List
 from datetime import datetime
+from decimal import Decimal
 
 
 class ZipCodeEntry(BaseModel):
@@ -36,7 +37,7 @@ class CollectionQueueItem(BaseModel):
 class CollectionGeocodeCache(BaseModel):
     zip_code: str = Field(pattern=r"^\d{5}$")
     country_code: str = Field(pattern=r"^[A-Z]{2}$")
-    latitude: float
-    longitude: float
+    latitude: Decimal
+    longitude: Decimal
     name: Optional[str]
     country: Optional[str]
