@@ -23,7 +23,7 @@ data "aws_iam_role" "lambda_execution_role"{
 }
 
 data "aws_iam_role" "weather_eventbridge_sfn_role"{
-  name = "weather-eventbridge-sfn-role "
+  name = "weather-eventbridge-sfn-role"
 }
 
 data "aws_s3_object" "lambda_code" {
