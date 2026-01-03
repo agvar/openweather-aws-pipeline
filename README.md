@@ -99,7 +99,7 @@ python -m openweather_pipeline.weather_data_collector
 
 ## 📈 Roadmap
 
-- [ ] Complete historical data collection (6 years × 5 locations)
+- [white_check_mark] Complete historical data collection (6 years × 5 locations)
 - [ ] Time-series feature engineering pipeline
 - [ ] LSTM temperature prediction model
 - [ ] AWS Bedrock LLM integration for explanations
