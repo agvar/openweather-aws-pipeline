@@ -2,9 +2,6 @@ from openweather_pipeline.weather_data_collector import WeatherDataCollector
 import json
 from typing import Dict, Any
 from openweather_pipeline.logger import get_logger
-from openweather_pipeline.dynamodb_operations import DynamoDBOperations
-from openweather_pipeline.config_manager import get_config
-from datetime import datetime
 
 logger = get_logger(__name__)
 
@@ -13,22 +10,21 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     logger.info("Weather collector Lambda function ")
     try:
         logger.info("Instantiating WeatherDataCollector")
-        config_params = get_config().config
-        region: str = config_params.get("aws", {}).get("region")
-        dynamodb = DynamoDBOperations(region)
         weatherCollector = WeatherDataCollector()
 
         zip_code = event.get("zip_code")
         country_code = event.get("country_code")
         date = event.get("date")
         item_id = event.get("item_id")
-        if zip_code and country_code and date:
-            weatherCollector.collect_weather_data(zip_code, country_code, date,item_id)
+
+        if zip_code and country_code and date and item_id:
+            weatherCollector.collect_weather_data(zip_code, country_code, date, item_id)
         else:
             raise ValueError(
                 f"Missing value for zipcode:{zip_code} "
                 f"country code:{country_code} "
                 f"or process_day:{date}"
+                f"or item_id:{item_id}"
             )
         return {
             "statusCode": 200,
@@ -47,6 +43,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "statusCode": 500,
             "body": json.dumps({"error": str(e)}),
         }
+
 
 if __name__ == "__main__":
     event = {
