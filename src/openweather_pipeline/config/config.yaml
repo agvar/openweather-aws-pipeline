@@ -16,7 +16,7 @@ dynamodb:
   tables:
     control_table_queue: "weather_collection_queue"
     control_table_progress: "weather_collection_progress" 
-    geocode_cache_table: "geocode_cache"
+    geocode_cache_table: "weather_geocode_cache"
   
 # Application settings
 app:
