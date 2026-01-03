@@ -28,10 +28,10 @@ class WeatherDataCollector:
             self.dynamodb = DynamoDBOperations(self.region)
             self.TIMEOUT = 10
             self.geocode_cache_table = (
-                self.config.get("dynamodb", {}).get("tables", {}).get("geocode_cache")
+                self.config.get("dynamodb", {}).get("tables", {}).get("geocode_cache_table")
             )
 
-            logger.info("WeatherDataCollector initialized successfully")
+            logger.info(f"WeatherDataCollector initialized successfully.{self.geocode_cache_table}")
         except Exception as e:
             logger.error(f"Failed to initialize WeatherDataCollector {str(e)}", exc_info=True)
             raise
