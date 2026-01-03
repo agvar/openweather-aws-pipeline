@@ -15,13 +15,13 @@ class DynamoDBOperations:
         try:
             logger.info("Starting dynamodb initialization")
             self.config = get_config().config
-            self.dynamoDb = boto3.resource("dynamodb", region_name=region)
+            self.dynamodb = boto3.resource("dynamodb", region_name=region)
         except Exception as e:
-            logger.error(f" Exception when initializing DynamoDB {e}", exc_info=True)
+            logger.error(f" Exception when initializing dynamodb {e}", exc_info=True)
 
     def get_item(self, model_class: Type[T], table_nm: str, key: Dict[str, str]) -> Optional[T]:
         try:
-            table = self.dynamoDb.Table(table_nm)
+            table = self.dynamodb.Table(table_nm)
             response = table.get_item(Key=key)
             if "Item" not in response:
                 return None
@@ -43,7 +43,7 @@ class DynamoDBOperations:
         **kwargs: Any,
     ) -> Optional[List[T]]:
         try:
-            table = self.dynamoDb.Table(table_nm)
+            table = self.dynamodb.Table(table_nm)
             response = table.query(
                 IndexName=index_name,
                 KeyConditionExpression=key_condition_expression,
@@ -73,7 +73,7 @@ class DynamoDBOperations:
     def put_item(self, model_instance: T, table_nm: str) -> bool:
         try:
             item_dict = model_instance.dict()
-            table = self.dynamoDb.Table(table_nm)
+            table = self.dynamodb.Table(table_nm)
             table.put_item(Item=item_dict)
             return True
         except Exception as e:
@@ -83,7 +83,7 @@ class DynamoDBOperations:
     def batch_put_items(self, items: List[T], table_nm: str) -> bool:
         try:
 
-            table = self.dynamoDb.Table(table_nm)
+            table = self.dynamodb.Table(table_nm)
             with table.batch_writer() as batch:
                 for item in items:
                     item_dict = item.dict()
@@ -96,7 +96,7 @@ class DynamoDBOperations:
 
     def check_table_isEmpty(self, table_nm: str) -> bool:
         try:
-            table = self.dynamoDb.Table(table_nm)
+            table = self.dynamodb.Table(table_nm)
             first_response = table.scan(Limit=1)
             item = first_response.get("Items", [])
             if item:
@@ -117,7 +117,7 @@ class DynamoDBOperations:
         expression_attrib_names: Optional[Dict[str, str]] = None,
     ) -> bool:
         try:
-            table = self.dynamoDb.Table(table_nm)
+            table = self.dynamodb.Table(table_nm)
             update_params: Dict = {
                 "Key": key,
                 "UpdateExpression": update_expression,
