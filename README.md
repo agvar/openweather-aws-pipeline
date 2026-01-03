@@ -1,6 +1,6 @@
 # OpenWeather AWS ML Pipeline
 
-Enterprise-grade weather data collection and ML prediction system with end-to-end data engineering, MLOps, and full-stack dev.
+Enterprise-grade weather data collection and ML prediction system with end-to-end data engineering, MLOps, and full-stack development.
 
 ## 🎯 Project Overview
 
