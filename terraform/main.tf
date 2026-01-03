@@ -22,6 +22,10 @@ data "aws_iam_role" "lambda_execution_role"{
   name = "weather-lambda-execution-role"
 }
 
+data "aws_iam_role" "weather_eventbridge_sfn_role"{
+  name = "weather-eventbridge-sfn-role "
+}
+
 data "aws_s3_object" "lambda_code" {
   bucket = data.aws_s3_bucket.weatherDataCode.bucket
   key    = "weather-collector.zip"
@@ -131,12 +135,6 @@ resource "aws_cloudwatch_event_target" "trigger_state_function"{
   rule = aws_cloudwatch_event_rule.weather_collection_schedule.name
   arn = data.aws_sfn_state_machine.state_machine_weather_data_load.arn
   target_id = "weather-data-load-state-function"
+  role_arn = data.aws_iam_role.weather_eventbridge_sfn_role.arn
 }
 
-resource "aws_lambda_permission" "allow_eventbridge" {
-  statement_id  = "AllowExecutionFromEventBridge"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.weather_collector_lambda.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.weather_collection_schedule.arn
-}
