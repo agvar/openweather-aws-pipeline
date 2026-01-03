@@ -27,6 +27,10 @@ data "aws_s3_object" "lambda_code" {
   key    = "weather-collector.zip"
 }
 
+data "aws_sfn_state_machine" "state_machine_weather_data_load"{
+  name="WeatherDataLoad"
+}
+
 ###################
 # Create Resources
 ###################
@@ -123,10 +127,10 @@ resource "aws_cloudwatch_event_rule" "weather_collection_schedule" {
   schedule_expression = "cron(0 6 * * ? *)"
  }
 
-resource "aws_cloudwatch_event_target" "trigger_lambda"{
+resource "aws_cloudwatch_event_target" "trigger_state_function"{
   rule = aws_cloudwatch_event_rule.weather_collection_schedule.name
-  arn = aws_lambda_function.weather_collector_lambda.arn
-  target_id = "weather-lambda-target"
+  arn = aws_sfn_state_machine.state_machine_weather_data_load.arn
+  target_id = "weather-data-load-state-function"
 }
 
 resource "aws_lambda_permission" "allow_eventbridge" {
