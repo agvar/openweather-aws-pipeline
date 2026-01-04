@@ -84,7 +84,7 @@ class S3Operations:
             logger.error(f"Failed to store object in S3: {str(e)}", exc_info=True)
             raise ValueError(f"Unexpected upload error: {e}")
 
-    def read_save_json_files_to_dataframe(
+    def read_and_save_json_files_to_dataframe(
         self, source_prefix: str, target_prefix: str, target_file: str
     ) -> pd.DataFrame:
         logger.info("Starting loading of JSON files from s3://{self.bucket}")

@@ -27,10 +27,10 @@ class DataLoader:
             logger.error(f"Failed to initialize Historical data processing {str(e)}", exc_info=True)
             raise
 
-    def read_save_json_files_to_dataframe(self) -> None:
+    def read_and_save_json_files_to_dataframe(self) -> None:
         logger.info("starting read of JSON files into dataframe")
         try:
-            self.s3Operations.read_save_json_files_to_dataframe(
+            self.s3Operations.read_and_save_json_files_to_dataframe(
                 self.source_prefix, self.processed_prefix, self.processed_file_name
             )
         except Exception as e:
@@ -40,4 +40,4 @@ class DataLoader:
 
 if __name__ == "__main__":
     weather_app = DataLoader()
-    weather_app.read_save_json_files_to_dataframe()
+    weather_app.read_and_save_json_files_to_dataframe()
