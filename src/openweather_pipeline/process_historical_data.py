@@ -27,14 +27,14 @@ class DataLoader:
             logger.error(f"Failed to initialize Historical data processing {str(e)}", exc_info=True)
             raise
 
-    def read_and_save_json_files_to_dataframe(self) -> None:
+    def read_and_save_json_files_to_parquet(self) -> None:
         logger.info("starting read of JSON files into dataframe")
         try:
-            self.s3Operations.read_and_save_json_files_to_dataframe(
+            self.s3Operations.read_and_save_json_files_to_parquet(
                 self.source_prefix, self.processed_prefix, self.processed_file_name
             )
         except Exception as e:
-            logger.error(f"Error during read of JSON files into dataframe: {str(e)}", exc_info=True)
+            logger.error(f"Error during read of JSON files into parquet: {str(e)}", exc_info=True)
             raise
 
 
