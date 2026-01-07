@@ -32,3 +32,20 @@ terraform.tfvars
 # OS
 .DS_Store
 Thumbs.db
+
+#Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints/*
+
+#Local data
+data/
+*/parquet
+*.csv
+*.h5
+*.pk1
+*.joblib
+
+#Model artifacts
+models/
+*.pth
+*.onnx
