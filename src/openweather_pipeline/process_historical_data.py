@@ -40,4 +40,4 @@ class DataLoader:
 
 if __name__ == "__main__":
     weather_app = DataLoader()
-    weather_app.read_and_save_json_files_to_dataframe()
+    weather_app.read_and_save_json_files_to_parquet()

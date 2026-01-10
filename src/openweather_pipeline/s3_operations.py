@@ -4,7 +4,7 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import uuid
 import pandas as pd
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, cast
 from openweather_pipeline.logger import get_logger
 
 logger = get_logger(__name__)
@@ -37,15 +37,18 @@ class S3Operations:
         except Exception as e:
             logger.error("Bucket verification failed", exc_info=True)
             raise ValueError(f"Unexpected Error :{e}")
-        
-    def read_file_as_bytes(self,key) -> bytes:
+
+    def read_file_as_bytes(self, key: str) -> bytes:
         try:
             response = self.s3_client.get_object(Bucket=self.bucket, Key=key)
-            content = response["Body"].read()
+            content = cast(bytes, response["Body"].read())
             return content
+        except ClientError as e:
+            logger.error(f"S3 Client Error for {key} :{str(e)}", exc_info=True)
+            raise ValueError(f"Could not read {key} from s3:{str(e)}")
         except Exception as e:
             logger.error(f"Failed to read object in S3: {str(e)}", exc_info=True)
-            raise ValueError(f"Unexpected read error: {e}")
+            raise
 
     def store_object_in_s3(
         self, prefix: str, zipcode: str, year: str, month: str, day: str, body: str
