@@ -37,6 +37,15 @@ class S3Operations:
         except Exception as e:
             logger.error("Bucket verification failed", exc_info=True)
             raise ValueError(f"Unexpected Error :{e}")
+        
+    def read_file_as_bytes(self,key) -> bytes:
+        try:
+            response = self.s3_client.get_object(Bucket=self.bucket, Key=key)
+            content = response["Body"].read()
+            return content
+        except Exception as e:
+            logger.error(f"Failed to read object in S3: {str(e)}", exc_info=True)
+            raise ValueError(f"Unexpected read error: {e}")
 
     def store_object_in_s3(
         self, prefix: str, zipcode: str, year: str, month: str, day: str, body: str
