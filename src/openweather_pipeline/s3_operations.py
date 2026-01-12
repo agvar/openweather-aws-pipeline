@@ -115,8 +115,10 @@ class S3Operations:
                     data_flattened = self.flatten_data(key, data)
 
                     key_parts = key.split("/")
-                    zipcode = key_parts[-2]
-                    data_flattened["zipcode"] = zipcode
+                    zip_code = key_parts[-2]
+                    country_code = key_parts[-2]
+                    data_flattened["zip_code"] = zip_code
+                    data_flattened["country_code"] = country_code
                     logger.info(f"Completed reading JSON file into dataframe for key {key}")
                     all_data.append(data_flattened)
 
