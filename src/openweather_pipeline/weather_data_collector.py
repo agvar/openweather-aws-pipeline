@@ -75,10 +75,10 @@ class WeatherDataCollector:
             if datetime.strptime(response_date, "%Y-%m-%d"):
                 response_year, response_month, response_day = response_date.split("-")
                 s3_key = (
-                f"{self.prefix}/year={response_year}/"
-                f"month={response_month}/day={response_day}/"
-                f"country_code={country_code}/"
-                f"zip_code={zip_code}/{uuid.uuid4()}.json"
+                    f"{self.prefix}/year={response_year}/"
+                    f"month={response_month}/day={response_day}/"
+                    f"country_code={country_code}/"
+                    f"zip_code={zip_code}/{uuid.uuid4()}.json"
                 )
                 self.s3Operations.store_object_in_s3(
                     key=s3_key,
