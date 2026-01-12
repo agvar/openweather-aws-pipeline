@@ -50,9 +50,7 @@ class S3Operations:
             logger.error(f"Failed to read object in S3: {str(e)}", exc_info=True)
             raise
 
-    def store_object_in_s3(
-        self, key: str, body: str
-    ) -> str:
+    def store_object_in_s3(self, key: str, body: str) -> str:
         try:
             timestamp = datetime.now()
             logger.info(f"Storing object in S3: s3://{self.bucket}/{key}")
@@ -115,8 +113,10 @@ class S3Operations:
                     data_flattened = self.flatten_data(key, data)
 
                     key_parts = key.split("/")
-                    zip_code = key_parts[-2]
-                    country_code = key_parts[-2]
+                    zip_code_part = key_parts[-2]
+                    country_code_part = key_parts[-2]
+                    zip_code = zip_code_part.split("=")[1]
+                    country_code = country_code_part.split("=")[1]
                     data_flattened["zip_code"] = zip_code
                     data_flattened["country_code"] = country_code
                     logger.info(f"Completed reading JSON file into dataframe for key {key}")
@@ -192,26 +192,23 @@ class S3Operations:
         except Exception as e:
             logger.error(f"Failed to list objects under {self.bucket}, {e}", exc_info=True)
             raise
-    
+
     def copy_s3_key(
-            self,
-            source_bucket_name: str,
-            source_object_key: str,
-            destination_bucket_name: str,
-            destination_object_key:str
-            ) -> None:
-        copy_source = {
-            'Bucket': source_bucket_name,
-            'Key': source_object_key
-        }
+        self,
+        source_bucket_name: str,
+        source_object_key: str,
+        destination_bucket_name: str,
+        destination_object_key: str,
+    ) -> None:
+        copy_source = {"Bucket": source_bucket_name, "Key": source_object_key}
         try:
             self.s3_client.copy_object(
-                CopySource=copy_source,
-                Bucket=destination_bucket_name,
-                Key=destination_object_key
+                CopySource=copy_source, Bucket=destination_bucket_name, Key=destination_object_key
             )
-            logger.info(f"file {source_bucket_name}/{source_object_key} copied " \
-                        f"to {destination_bucket_name}/{destination_object_key}")
+            logger.info(
+                f"file {source_bucket_name}/{source_object_key} copied "
+                f"to {destination_bucket_name}/{destination_object_key}"
+            )
         except Exception as e:
             logger.error(f"Failed to list objects under {self.bucket}, {e}", exc_info=True)
             raise
