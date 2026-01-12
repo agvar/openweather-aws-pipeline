@@ -2,7 +2,7 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 from datetime import datetime
-import uuid
+
 import pandas as pd
 from typing import List, Dict, Any, Optional, cast
 from openweather_pipeline.logger import get_logger
@@ -51,32 +51,25 @@ class S3Operations:
             raise
 
     def store_object_in_s3(
-        self, prefix: str, zipcode: str, year: str, month: str, day: str, body: str
+        self, key: str, body: str
     ) -> str:
         try:
             timestamp = datetime.now()
-            s3_key = (
-                f"{prefix}/year={year}/"
-                f"month={month}/day={day}/"
-                f"zipcode={zipcode}/{uuid.uuid4()}.json"
-            )
-
-            logger.info(f"Storing object in S3: s3://{self.bucket}/{s3_key}")
+            logger.info(f"Storing object in S3: s3://{self.bucket}/{key}")
             response = self.s3_client.put_object(
                 Bucket=self.bucket,
-                Key=s3_key,
+                Key=key,
                 Body=body,
                 ContentType="application/json",
                 Metadata={
-                    "part_key": zipcode,
                     "collection_time": timestamp.isoformat(),
                     "source": "Openweather_api_response",
                 },
             )
 
             if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-                logger.info(f"Successfully stored data for zipcode {zipcode} in S3")
-                return s3_key
+                logger.info(f"Successfully stored data for key {key} in S3")
+                return key
             else:
                 logger.error(
                     f"S3 Upload failed with status: \
@@ -173,7 +166,6 @@ class S3Operations:
             if not source_prefix.endswith("/"):
                 source_prefix += "/"
             logger.info(f"Searching for .{extension} files under {self.bucket}/{source_prefix}...")
-
             paginator = self.s3_client.get_paginator("list_objects_v2")
             pages = paginator.paginate(Bucket=self.bucket, Prefix=source_prefix)
             for page in pages:
@@ -195,6 +187,29 @@ class S3Operations:
                     f"No files listed under folder: {source_prefix} in bucket {self.bucket}"
                 )
             return all_data
+        except Exception as e:
+            logger.error(f"Failed to list objects under {self.bucket}, {e}", exc_info=True)
+            raise
+    
+    def copy_s3_key(
+            self,
+            source_bucket_name: str,
+            source_object_key: str,
+            destination_bucket_name: str,
+            destination_object_key:str
+            ) -> None:
+        copy_source = {
+            'Bucket': source_bucket_name,
+            'Key': source_object_key
+        }
+        try:
+            self.s3_client.copy_object(
+                CopySource=copy_source,
+                Bucket=destination_bucket_name,
+                Key=destination_object_key
+            )
+            logger.info(f"file {source_bucket_name}/{source_object_key} copied " \
+                        f"to {destination_bucket_name}/{destination_object_key}")
         except Exception as e:
             logger.error(f"Failed to list objects under {self.bucket}, {e}", exc_info=True)
             raise

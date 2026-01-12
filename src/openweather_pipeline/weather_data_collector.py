@@ -9,6 +9,7 @@ from openweather_pipeline.models.collection_models import CollectionGeocodeCache
 from decimal import Decimal
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
+import uuid
 
 logger = get_logger(__name__)
 
@@ -73,18 +74,17 @@ class WeatherDataCollector:
 
             if datetime.strptime(response_date, "%Y-%m-%d"):
                 response_year, response_month, response_day = response_date.split("-")
+                s3_key = (
+                f"{self.prefix}/year={response_year}/"
+                f"month={response_month}/day={response_day}/"
+                f"country_code={country_code}/"
+                f"zip_code={zip_code}/{uuid.uuid4()}.json"
+                )
                 self.s3Operations.store_object_in_s3(
-                    self.prefix,
-                    zip_code,
-                    response_year,
-                    response_month,
-                    response_day,
-                    json.dumps(weather_json_response),
+                    key=s3_key,
+                    body=json.dumps(weather_json_response),
                 )
-                logger.info(
-                    f"api processing complete for zipcode{zip_code}, \
-                    country_code{country_code} and day :{response_day}"
-                )
+                logger.info(f"api processing complete for s3_key{s3_key}")
             else:
                 raise ValueError(
                     f"Weather API response does not return date key, \
