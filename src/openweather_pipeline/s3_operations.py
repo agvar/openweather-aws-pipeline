@@ -114,7 +114,7 @@ class S3Operations:
 
                     key_parts = key.split("/")
                     zip_code_part = key_parts[-2]
-                    country_code_part = key_parts[-2]
+                    country_code_part = key_parts[-3]
                     zip_code = zip_code_part.split("=")[1]
                     country_code = country_code_part.split("=")[1]
                     data_flattened["zip_code"] = zip_code
