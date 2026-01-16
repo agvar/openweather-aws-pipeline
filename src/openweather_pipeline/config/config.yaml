@@ -11,6 +11,7 @@ s3:
     source_prefix: "openweather_api"
     processed_prefix: "processed"
     processed_file_name: "daily_weather.parquet"
+    cleaned_file_name: "daily_weather.parquet"
   
 dynamodb:
   tables:
