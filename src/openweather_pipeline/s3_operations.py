@@ -50,20 +50,34 @@ class S3Operations:
             logger.error(f"Failed to read object in S3: {str(e)}", exc_info=True)
             raise
 
-    def store_object_in_s3(self, key: str, body: str) -> str:
+    def store_object_in_s3(self, key: str, body: str, transfer: str = 'put') -> str:
         try:
             timestamp = datetime.now()
             logger.info(f"Storing object in S3: s3://{self.bucket}/{key}")
-            response = self.s3_client.put_object(
-                Bucket=self.bucket,
-                Key=key,
-                Body=body,
-                ContentType="application/json",
-                Metadata={
-                    "collection_time": timestamp.isoformat(),
-                    "source": "Openweather_api_response",
-                },
-            )
+            
+            if transfer=='upload_fileobj':
+                response= self.s3_client.upload_fileobj(
+                    Fileobj = body,
+                    Bucket=self.bucket,
+                    Key=key,
+                    ExtraArgs={
+                        "collection_time": timestamp.isoformat(),
+                        "source": "Openweather_api_response",
+                    }
+                )
+            else:
+                response = self.s3_client.put_object(
+                                    Bucket=self.bucket,
+                                    Key=key,
+                                    Body=body,
+                                    ContentType="application/json",
+                                    Metadata={
+                                        "collection_time": timestamp.isoformat(),
+                                        "source": "Openweather_api_response",
+                                    },
+                                )
+
+
 
             if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
                 logger.info(f"Successfully stored data for key {key} in S3")
