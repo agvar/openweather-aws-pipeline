@@ -61,20 +61,23 @@ class S3Operations:
                     Bucket=self.bucket,
                     Key=key,
                     ExtraArgs={
+                        "ContentType": "application/json",
+                        "Metadata": {
                         "collection_time": timestamp.isoformat(),
                         "source": "Openweather_api_response",
+                        }
                     }
                 )
             else:
                 response = self.s3_client.put_object(
-                                    Bucket=self.bucket,
-                                    Key=key,
-                                    Body=body,
-                                    ContentType="application/json",
-                                    Metadata={
-                                        "collection_time": timestamp.isoformat(),
-                                        "source": "Openweather_api_response",
-                                    },
+                    Bucket=self.bucket,
+                    Key=key,
+                    Body=body,
+                    ContentType="application/json",
+                    Metadata={
+                        "collection_time": timestamp.isoformat(),
+                        "source": "Openweather_api_response",
+                    },
                                 )
 
 
