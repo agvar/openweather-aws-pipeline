@@ -78,21 +78,18 @@ class S3Operations:
                         "collection_time": timestamp.isoformat(),
                         "source": "Openweather_api_response",
                     },
-                                )
-
-
-
-            if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-                logger.info(f"Successfully stored data for key {key} in S3")
-                return key
-            else:
-                logger.error(
-                    f"S3 Upload failed with status: \
-                        {response['ResponseMetadata']['HTTPStatusCode']}"
                 )
-                raise ValueError(
-                    f"Upload failed with status: {response['ResponseMetadata']['HTTPStatusCode']}"
-                )
+                if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+                    logger.info(f"Successfully stored data for key {key} in S3")
+                    return key
+                else:
+                    logger.error(
+                        f"S3 Upload failed with status: \
+                            {response['ResponseMetadata']['HTTPStatusCode']}"
+                    )
+                    raise ValueError(
+                        f"Upload failed with status: {response['ResponseMetadata']['HTTPStatusCode']}"
+                    )
 
         except ClientError as e:
             error_code = e.response["Error"]["Code"]
